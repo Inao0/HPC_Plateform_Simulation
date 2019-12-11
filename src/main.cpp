@@ -1,6 +1,9 @@
-#include <iostream>
 
-int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
+#include "../include/HPCSimulator.h"
+
+int main()
+{
+		HPCSimulator b;
+		b.start();
+		return 0;
 }
