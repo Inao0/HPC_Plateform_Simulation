@@ -12,9 +12,11 @@ Inspired by Generator
 void User::execute(AbstractSimulator *simulator) {
     std::random_device rd;     // only used once to initialise (seed) engine
     std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
-    std::uniform_int_distribution<int> uni(1, 3); // guaranteed unbiased //TODO : check it is lower than instantaneous cap
     Event::execute(simulator);
-    double executionTime = Random::exponential(10);
+    AbstractJob *job = CreateRandomJob();
+    std::uniform_int_distribution<int> uni(1,
+                                           job->maxNodes()); // guaranteed unbiased //TODO : check it is lower than instantaneous cap
+    double executionTime = Random::exponential(job->maxTime()/2);
     int numberOfNodes = uni(rng);
 
     if (currentlyUsedNumberOfNodes + numberOfNodes <= instantaneousMaxNumberOfNodes) {
@@ -22,12 +24,12 @@ void User::execute(AbstractSimulator *simulator) {
         if (budgetLeft() - ((executionTime * scheduler->costPerHourPerNode()) * numberOfNodes) >= 0) {
 
             // patients arrive on average one every 5 mins (12 per hour)
-            Job *job = new Job(++User::numOfJobs);
+
             job->setSubmittingTime(time);
             job->setNumberOfNodes(numberOfNodes);
             job->setExecutionTime(executionTime);
             job->setUser(this);
-            std::cout << "Job " << job->getId() << " submitted at time " << convertTime(time) << " by User " << userId
+            std::cout << job->getType() << "job " << job->getId() << " submitted at time " << convertTime(time) << " by User " << userId
                       << "\n";
             std::cout << "Job " << job->getId() << " requires " << job->getNumberOfNodes() << " nodes\n";
 
@@ -49,7 +51,7 @@ void User::execute(AbstractSimulator *simulator) {
     } else {
         time += Random::exponential(12);
         std::cout << "User " << userId << " has not enough instantaneous nodes for this job. \n"
-                  << "User will try to submit an other job at :"<< convertTime(time)<<". \n"
+                  << "User will try to submit an other job at :" << convertTime(time) << ". \n"
                   << "New Nodes required : " << numberOfNodes << "/ currently used nodes :"
                   << currentlyUsedNumberOfNodes << "/ max :" << instantaneousMaxNumberOfNodes << "\n";
 

@@ -2,6 +2,7 @@
 #include <cmath>
 #include "../include/AbstractScheduler.h"
 #include "../include/User.h"
+#include "../include/AbstractJob.h"
 
 
 // convert the time in seconds to hrs, mins, secs
@@ -65,7 +66,7 @@ bool Node::isAvailable() {
 * as a parameter so that this can  schedule the time
 * when this server will be done with the customer.
 */
-void Node::insert(AbstractSimulator *simulator, Job *job) {
+void Node::insert(AbstractSimulator *simulator, AbstractJob *job) {
     if (jobBeingExecuted != nullptr) {
         /* Should never reach here */
         std::cout << "Error: I am busy serving someone else" << "\n";

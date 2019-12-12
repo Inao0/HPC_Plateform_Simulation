@@ -2,14 +2,14 @@
 #include "../include/User.h"
 
 Scheduler::Scheduler() {
-    jobs = new  std::list<Job*>();
+    jobs = new  std::list<AbstractJob*>();
 }
 
 Scheduler::~Scheduler() {
     delete jobs;
 }
 
-void Scheduler::insert(class AbstractSimulator * simulator, class Job * job, User* user) {
+void Scheduler::insert(class AbstractSimulator * simulator, class AbstractJob * job, User* user) {
     if( jobs->size()==0 && freeNodes.size()>=job->getNumberOfNodes() ){
         for (int i = 0; i < job->getNumberOfNodes(); ++i) {
             Node* node = freeNodes.front();
@@ -22,7 +22,7 @@ void Scheduler::insert(class AbstractSimulator * simulator, class Job * job, Use
 }
 void Scheduler::addFreeNode(class AbstractSimulator * simulator, class Node * node) {
     this->freeNodes.push(node);
-    Job* nextJob = jobs->front();
+    AbstractJob* nextJob = jobs->front();
     while ( nextJob !=NULL && freeNodes.size()>=nextJob->getNumberOfNodes() ){
         for (int i = 0; i < nextJob->getNumberOfNodes(); ++i) {
             Node* node = freeNodes.front();

@@ -3,15 +3,18 @@
 
 #include <queue>
 #include "../include/Node.h"
-#include "../include/Queue.h"
+#include "AbstractJob.h"
 #include <list>
 
 
 class User;
+class MediumJob;
+class LargeJob;
+class HugeJob;
 
 class Scheduler {
 private:
-    std::list<Job *> *jobs; //maybe should use a heap for ordering according to priority maybe heaps for different jobs and then take the one with the highest priority ?
+    std::list<AbstractJob *> *jobs; //maybe should use a heap for ordering according to priority maybe heaps for different jobs and then take the one with the highest priority ?
     std::queue<Node *> freeNodes;
 
 
@@ -24,18 +27,22 @@ public:
 
     ~Scheduler();
 
-    void insert(AbstractSimulator *simulator, Job *job, User *user);
+    void insert(AbstractSimulator *simulator, AbstractJob *job, User *user);
 
     /**
      * return the first customer in the queue
     */
-    Job *nextJob();
+    AbstractJob *nextJob();
 
     void addFreeNode(AbstractSimulator *simulator, Node *node);
 
     double costPerHourPerNode();
 
     double const costOneHourOneNode = 1;
+
+    void insertMediumJob(MediumJob* job){};
+    void insertLargeJob(LargeJob* job){};
+    void insertHugeJob(HugeJob* job){};
 };
 
 #endif //SUPERCOMPUTERSIMULATION_ABSTRACTSCHEDULER_H
