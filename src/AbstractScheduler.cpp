@@ -1,5 +1,5 @@
 #include "../include/AbstractScheduler.h"
-
+#include "../include/User.h"
 
 Scheduler::Scheduler() {
     jobs = new  std::list<Job*>();
@@ -9,7 +9,7 @@ Scheduler::~Scheduler() {
     delete jobs;
 }
 
-void Scheduler::insert(class AbstractSimulator * simulator, class Job * job) {
+void Scheduler::insert(class AbstractSimulator * simulator, class Job * job, User* user) {
     if( jobs->size()==0 && freeNodes.size()>=job->getNumberOfNodes() ){
         for (int i = 0; i < job->getNumberOfNodes(); ++i) {
             Node* node = freeNodes.front();
@@ -20,7 +20,7 @@ void Scheduler::insert(class AbstractSimulator * simulator, class Job * job) {
         jobs->push_back(job);
     }
 }
-void Scheduler::addNode(class AbstractSimulator * simulator, class Node * node) {
+void Scheduler::addFreeNode(class AbstractSimulator * simulator, class Node * node) {
     this->freeNodes.push(node);
     Job* nextJob = jobs->front();
     while ( nextJob !=NULL && freeNodes.size()>=nextJob->getNumberOfNodes() ){
@@ -51,7 +51,7 @@ public:
      * return the first customer in the queue
     *//*
     Job* nextJob();
-    void addNode(Node* node) {this->freeNodes.push(node);}
+    void addFreeNode(Node* node) {this->freeNodes.push(node);}
 
 };
 

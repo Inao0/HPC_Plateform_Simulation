@@ -7,11 +7,13 @@
 #include <list>
 
 
+class User;
 
 class Scheduler {
 private:
-    std::list<Job *> * jobs; //maybe should use a heap for ordering according to priority maybe heaps for different jobs and then take the one with the highest priority ?
+    std::list<Job *> *jobs; //maybe should use a heap for ordering according to priority maybe heaps for different jobs and then take the one with the highest priority ?
     std::queue<Node *> freeNodes;
+
 
 public:
     Scheduler();
@@ -22,14 +24,14 @@ public:
 
     ~Scheduler();
 
-    void insert(AbstractSimulator *simulator, Job *job);
+    void insert(AbstractSimulator *simulator, Job *job, User *user);
 
     /**
      * return the first customer in the queue
     */
     Job *nextJob();
 
-    void addNode(AbstractSimulator *simulator, Node *node);
+    void addFreeNode(AbstractSimulator *simulator, Node *node);
 
     double costPerHourPerNode();
 

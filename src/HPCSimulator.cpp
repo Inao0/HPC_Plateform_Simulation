@@ -18,9 +18,9 @@ void HPCSimulator::start() {
 
 	user1->addScheduler(scheduler);
 	user2->addScheduler(scheduler);
-	scheduler->addNode(this, node1);
-	scheduler->addNode(this, node2);
-	scheduler->addNode(this, node3);
+    scheduler->addFreeNode(this, node1);
+    scheduler->addFreeNode(this, node2);
+    scheduler->addFreeNode(this, node3);
 	node1->addScheduler(scheduler);
 	node2->addScheduler(scheduler);
 	node3->addScheduler(scheduler);

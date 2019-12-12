@@ -6,8 +6,10 @@
 #include "Queue.h"
 #include <list>
 #include <cmath>
-class Scheduler;
 
+
+class Scheduler;
+class User;
 /**
 * A server that holds a customer for an exponentially distributed amout of time
 * and releases it.

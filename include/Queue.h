@@ -5,6 +5,8 @@
 
 /*class JobQueue;*/
 
+class User;
+
 // the Customer class (in this example patients)
 class Job {
 private:
@@ -13,6 +15,8 @@ private:
     double waitingTime;    // job waiting time
     double executionTime=0;  // job execution time
     int numberOfNodes;
+    User * user;
+
 public:
     Job() = default;
 
@@ -48,6 +52,15 @@ public:
         numberOfNodes = nbNodes;
         return *this;
     };
+
+    User *getUser() const {
+        return user;
+    }
+
+    void setUser(User *user) {
+        Job::user = user;
+    }
+
 };
 
 /*
@@ -80,7 +93,7 @@ public:
     *//*
     Job *remove();
 
-    void addNode(Node *node) { this->node = node; }
+    void addFreeNode(Node *node) { this->node = node; }
 
     int size();
 

@@ -1,6 +1,8 @@
 #include "../include/Node.h"
 #include <cmath>
 #include "../include/AbstractScheduler.h"
+#include "../include/User.h"
+
 
 // convert the time in seconds to hrs, mins, secs
 string convertTime(double t) {
@@ -48,8 +50,9 @@ void Node::getStats() const {
 void Node::execute(AbstractSimulator *simulator) {
     Event::execute(simulator);
     printMessage();
+    (jobBeingExecuted->getUser())->reduceNumberOfCurrentlyUsedNodeBy(1);
     jobBeingExecuted = nullptr;
-    scheduler->addNode(simulator,this);
+    scheduler->addFreeNode(simulator, this);
 }
 
 

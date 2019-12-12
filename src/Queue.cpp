@@ -1,4 +1,5 @@
 #include "../include/Queue.h"
+#include "../include/User.h"
 
 
 /*JobQueue::JobQueue() {
