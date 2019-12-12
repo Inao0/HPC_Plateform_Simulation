@@ -11,14 +11,17 @@ void HPCSimulator::start() {
 	/* Connect them together. */
 	Node* node1 = new Node();
     Node* node2 = new Node();
+    Node* node3 = new Node();
 	Scheduler* scheduler = new Scheduler();
 	User* user = new User();
 
 	user->addScheduler(scheduler);
 	scheduler->addNode(this, node1);
 	scheduler->addNode(this, node2);
+	scheduler->addNode(this, node3);
 	node1->addScheduler(scheduler);
 	node2->addScheduler(scheduler);
+	node3->addScheduler(scheduler);
 	/* Start the generator by creating one customer immediately */
 	insert(user);
 

@@ -31,6 +31,9 @@ public:
 
     void addNode(AbstractSimulator *simulator, Node *node);
 
+    double costPerHourPerNode();
+
+    double const costOneHourOneNode = 1;
 };
 
 #endif //SUPERCOMPUTERSIMULATION_ABSTRACTSCHEDULER_H

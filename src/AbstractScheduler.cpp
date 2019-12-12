@@ -34,6 +34,10 @@ void Scheduler::addNode(class AbstractSimulator * simulator, class Node * node) 
     }
 }
 
+double Scheduler::costPerHourPerNode() {
+    return (costOneHourOneNode);
+}
+
 /*class Scheduler {
 private:
     std::list<Job*>* jobs; //maybe should use a heap for ordering according to priority maybe heaps for different jobs and then take the one with the highest priority ?

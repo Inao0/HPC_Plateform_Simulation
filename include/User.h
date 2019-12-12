@@ -8,6 +8,7 @@
 */
 class User : public Event {
 protected:
+    double budget = 1;
     Scheduler* scheduler;
     int num; // number of customers generated
 public:
@@ -15,6 +16,8 @@ public:
     User(const User& g) = delete;
     User& operator=(const User& g) = delete;
     void execute(AbstractSimulator* simulator);
-    void addScheduler(Scheduler* scheduler) { this->scheduler = scheduler; }
+    void addScheduler(Scheduler* scheduler) { this->scheduler = scheduler;}
+    double budgetLeft();
+
 };
 #endif //SUPERCOMPUTERSIMULATION_USER_H
