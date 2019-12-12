@@ -10,7 +10,12 @@ class User : public Event {
 protected:
     double budget = 1;
     Scheduler* scheduler;
-    int num; // number of customers generated
+    static int numOfJobs; // number of customers generated
+    static int numOfUsers;
+    int userId;
+public:
+    int getUserId() const;
+
 public:
     User(double time = 0.0);
     User(const User& g) = delete;

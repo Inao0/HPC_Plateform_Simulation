@@ -13,9 +13,11 @@ void HPCSimulator::start() {
     Node* node2 = new Node();
     Node* node3 = new Node();
 	Scheduler* scheduler = new Scheduler();
-	User* user = new User();
+	User* user1 = new User();
+    User* user2 = new User();
 
-	user->addScheduler(scheduler);
+	user1->addScheduler(scheduler);
+	user2->addScheduler(scheduler);
 	scheduler->addNode(this, node1);
 	scheduler->addNode(this, node2);
 	scheduler->addNode(this, node3);
@@ -23,7 +25,8 @@ void HPCSimulator::start() {
 	node2->addScheduler(scheduler);
 	node3->addScheduler(scheduler);
 	/* Start the generator by creating one customer immediately */
-	insert(user);
+	insert(user1);
+	insert(user2);
 
 	// execute the events
 	doAllEvents();
@@ -35,7 +38,8 @@ void HPCSimulator::start() {
 	delete node1;
 	delete node2;
 	delete scheduler;
-	delete user;
+	delete user1;
+	delete user2;
 
 }
 

@@ -1,7 +1,9 @@
 #include "../include/User.h"
 
-User::User(double time) : Event(time) { num = 0; }
+User::User(double time) : Event(time) {  userId =  ++numOfUsers;}// Used to be numOfJobs = 0;
 
+int User::numOfJobs = 0;
+int User::numOfUsers = 0;
 /**
 Inspired by Generator
  A user is generating Jobs for the HPC
@@ -18,11 +20,11 @@ void User::execute(AbstractSimulator *simulator) {
     if (budgetLeft() - ((executionTime * scheduler->costPerHourPerNode())* numberOfNodes)>= 0) {
 
         // patients arrive on average one every 5 mins (12 per hour)
-        Job *job = new Job(++num);
+        Job *job = new Job(++User::numOfJobs);
         job->setSubmittingTime(time);
         job->setNumberOfNodes(numberOfNodes);
         job->setExecutionTime(executionTime);
-        std::cout << "Job " << job->getId() << " submitted at time " << convertTime(time) << "\n";
+        std::cout << "Job " << job->getId() << " submitted at time " << convertTime(time) << " by User "<< userId << "\n";
         std::cout << "Job " << job->getId() << " requires " << job->getNumberOfNodes() << " nodes\n";
         // insert the customer into the queue
         scheduler->insert(simulator, job);
@@ -32,12 +34,16 @@ void User::execute(AbstractSimulator *simulator) {
         simulator->insert(this);
         budget -=  (executionTime * scheduler->costPerHourPerNode())*numberOfNodes;
     } else {
-        std::cout << "User has not enough budget left for is next job. Budget left : " << budgetLeft() << " / Next Job : " << convertTime(executionTime) << " on " << numberOfNodes<<" Nodes \n";
+        std::cout << "User " << userId <<" has not enough budget left for is next job. Budget left : " << budgetLeft() << " / Next Job : " << convertTime(executionTime) << " on " << numberOfNodes<<" Nodes \n";
     }
 }
 
 double User::budgetLeft() {
     return budget;
+}
+
+int User::getUserId() const {
+    return userId;
 }
 
 
