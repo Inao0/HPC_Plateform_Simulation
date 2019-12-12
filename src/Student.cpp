@@ -1,5 +1,6 @@
-//
-// Created by inao on 12/12/2019.
-//
-
 #include "../include/Student.h"
+
+Student::Student(Curriculum* curriculum, double time) : User(time), curriculum(curriculum) {
+    budget = curriculum->getCumulativeCapInNodeHour();
+    instantaneousMaxNumberOfNodes = curriculum->getInstantaneousCapInNode();
+}

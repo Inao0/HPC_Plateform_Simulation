@@ -12,7 +12,7 @@ Inspired by Generator
 void User::execute(AbstractSimulator *simulator) {
     std::random_device rd;     // only used once to initialise (seed) engine
     std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
-    std::uniform_int_distribution<int> uni(1, 3); // guaranteed unbiased
+    std::uniform_int_distribution<int> uni(1, 3); // guaranteed unbiased //TODO : check it is lower than instantaneous cap
     Event::execute(simulator);
     double executionTime = Random::exponential(10);
     int numberOfNodes = uni(rng);

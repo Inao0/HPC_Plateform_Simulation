@@ -1,6 +1,7 @@
 #include "../include/HPCSimulator.h"
 #include "../include/AbstractScheduler.h"
 #include "../include/User.h"
+#include "../include/Student.h"
 #include <cmath>
 
 void HPCSimulator::start() {
@@ -13,11 +14,17 @@ void HPCSimulator::start() {
     Node* node2 = new Node();
     Node* node3 = new Node();
 	Scheduler* scheduler = new Scheduler();
-	User* user1 = new User();
-    User* user2 = new User();
+	Curriculum *curriculum1 = new Curriculum(1.5,3);
+    Curriculum *curriculum2 = new Curriculum(80,4);
+
+	Student* user1 = new Student(curriculum1);
+	Student* user2 = new Student(curriculum2);
+	Student* user3 = new Student(curriculum2);
+
 
 	user1->addScheduler(scheduler);
 	user2->addScheduler(scheduler);
+	user3->addScheduler(scheduler);
     scheduler->addFreeNode(this, node1);
     scheduler->addFreeNode(this, node2);
     scheduler->addFreeNode(this, node3);
@@ -27,6 +34,7 @@ void HPCSimulator::start() {
 	/* Start the generator by creating one customer immediately */
 	insert(user1);
 	insert(user2);
+	insert(user3);
 
 	// execute the events
 	doAllEvents();
@@ -37,9 +45,14 @@ void HPCSimulator::start() {
 	// free the memory, note that events is freed in the base class destructor
 	delete node1;
 	delete node2;
+	delete node3;
+	delete curriculum1;
+	delete curriculum2;
 	delete scheduler;
 	delete user1;
 	delete user2;
+	delete user3;
+
 
 }
 
