@@ -35,12 +35,12 @@ void User::execute(AbstractSimulator *simulator) {
 
             // insert the customer into the queue
             job->insertIn(simulator, scheduler);
-
+            removeFromBudget( (executionTime * scheduler->costPerHourPerNode()) * numberOfNodes);
 
             time += Random::exponential(12);
 
             simulator->insert(this);
-            budget -= (executionTime * scheduler->costPerHourPerNode()) * numberOfNodes;
+
             currentlyUsedNumberOfNodes += numberOfNodes;
             std::cout << "User " << userId << " is using " << currentlyUsedNumberOfNodes << " out of "
                       << instantaneousMaxNumberOfNodes << "\n"
@@ -69,6 +69,10 @@ double User::budgetLeft() {
 
 int User::getUserId() const {
     return userId;
+}
+
+void User::removeFromBudget(double amountToRemove) {
+    budget -= amountToRemove;
 }
 
 

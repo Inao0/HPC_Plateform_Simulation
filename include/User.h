@@ -30,6 +30,8 @@ public:
 
     double budgetLeft();
 
+    void removeFromBudget(double amountToRemove);
+
     void reduceNumberOfCurrentlyUsedNodeBy(int numberOfNodes) {
         currentlyUsedNumberOfNodes -= numberOfNodes;
     };
