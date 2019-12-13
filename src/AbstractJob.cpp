@@ -18,6 +18,7 @@ CreateJobFn create[] =
         {
                 &CreateJob<LargeJob>,
                 &CreateJob<MediumJob>,
+				& CreateJob<SmallJob>,
                 &CreateJob<MediumJob>//,
                 //&CreateJob<HugeJob>
         };
@@ -35,7 +36,9 @@ void LargeJob::insertIn(AbstractSimulator *simulator,Scheduler *scheduler) {
 void MediumJob::insertIn(AbstractSimulator *simulator,Scheduler *scheduler) {
     scheduler->insertMediumJob(simulator,this);
 }
-
+void SmallJob::insertIn(AbstractSimulator* simulator, Scheduler* scheduler) {
+	scheduler->insertSmallJob(simulator, this);
+}
 void HugeJob::insertIn(AbstractSimulator *simulator,Scheduler *scheduler) {
     scheduler->insertHugeJob(simulator,this);
 }
@@ -55,7 +58,13 @@ void MediumJob::tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler)
     scheduler->tryToExecuteNextMediumJob(simulator);
 }
 
+int SmallJob::maxNumberOfNode = 2;
+double SmallJob::maximumTime = 1;
+
+void SmallJob::tryToExecute(AbstractSimulator* simulator, Scheduler* scheduler) {
+	scheduler->tryToExecuteNextSmallJob(simulator);
+}
+
 int HugeJob::maxNumberOfNode = 6;
 double HugeJob::maximumTime = 64;
-
 
