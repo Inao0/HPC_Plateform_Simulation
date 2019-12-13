@@ -4,6 +4,7 @@
 
 Scheduler::Scheduler() {
     mediumJobs = new std::list<MediumJob *>;
+	smallJobs = new std::list<SmallJob*>;
     largeJobs = new std::list<LargeJob *>;
     hugeJobs = new std::list<HugeJob *>;
 
@@ -14,6 +15,10 @@ Scheduler::Scheduler() {
 void Scheduler::addFreeMediumNode(AbstractSimulator *simulator, ReservedForMediumJobNode *node) {
     this->freeMediumNodes.push(node);
     tryToExecuteNextMediumJob(simulator);
+}
+void Scheduler::addFreeSmallNode(AbstractSimulator* simulator, ReservedForSmallJobNode* node) {
+	this->freeSmallNodes.push(node);
+	tryToExecuteNextSmallJob(simulator);
 }
 
 void Scheduler::addFreeNode(class AbstractSimulator *simulator, class Node *node) {
@@ -37,6 +42,18 @@ void Scheduler::insertMediumJob(AbstractSimulator *simulator, MediumJob *job) {
         mediumJobs->push_back(job);
     }
 }
+void Scheduler::insertSmallJob(AbstractSimulator* simulator, SmallJob *job) {
+	if (smallJobs->empty()) {
+		smallJobs->push_back(job);
+		tryToExecuteNextSmallJob(simulator);
+	}
+	else {
+		smallJobs->push_back(job);
+	}
+}
+
+
+
 
 void Scheduler::insertLargeJob(class AbstractSimulator *simulator, class LargeJob *job) {
     if (largeJobs->empty()) {
@@ -48,13 +65,22 @@ void Scheduler::insertLargeJob(class AbstractSimulator *simulator, class LargeJo
 }
 
 AbstractJob *Scheduler::nextJob() {
-    //TODO add small job
+   
     MediumJob *nextMediumJob;
     if (mediumJobs->empty()) {
         nextMediumJob = nullptr;
     } else {
         nextMediumJob = mediumJobs->front();
     }
+	SmallJob *nextSmallJob;
+	if (smallJobs->empty()) {
+		nextSmallJob = nullptr;
+	}
+	else {
+		nextSmallJob = smallJobs->front();
+	}
+
+
     LargeJob *nextLargeJob;
     if (largeJobs->empty()) {
         nextLargeJob = nullptr;
@@ -66,6 +92,13 @@ AbstractJob *Scheduler::nextJob() {
         return (nextLargeJob);
     } else if (nextLargeJob == nullptr) {
         return (nextMediumJob);
+		if (nextSmallJob == nullptr) {
+			return (nextMediumJob);
+		}
+		else if (nextMediumJob == nullptr) {
+			return (nextSmallJob);
+
+
     } else {
         if (nextLargeJob->getSubmittingTime() < nextMediumJob->getSubmittingTime()) {
             return (nextLargeJob);
@@ -117,10 +150,47 @@ void Scheduler::tryToExecuteNextMediumJob(AbstractSimulator *simulator) { //TODO
     }
 }
 
+void Scheduler::tryToExecuteNextSmallJob(AbstractSimulator* simulator) { //TODO : IMPROVE
+	AbstractJob* nextSmallJob = smallJobs->front();
+	if (nextSmallJob != NULL && freeSmallNodes.size() >= nextSmallJob->getNumberOfNodes()) {
+		for (int i = 0; i < nextSmallJob->getNumberOfNodes(); ++i) {
+			Node* node = freeSmallNodes.front();
+			freeSmallNodes.pop();
+			node->insert(simulator, nextSmallJob);
+		}
+		smallJobs->pop_front();
+		return;
+	}
+	else if (nextSmallJob != NULL &&
+		(freeSmallNodes.size() + freeNodes.size()) >= nextSmallJob->getNumberOfNodes() &&
+		nextSmallJob == nextJob()) { 
+		for (int i = 0; i < nextSmallJob->getNumberOfNodes(); ++i) {
+			if (!freeSmallNodes.empty()) {
+				Node* node = freeSmallNodes.front();
+				freeSmallNodes.pop();
+				node->insert(simulator, nextSmallJob);
+			}
+			else {
+				if (!freeNodes.empty()) {
+					Node* node = freeNodes.front();
+					freeNodes.pop();
+					node->insert(simulator, nextSmallJob);
+				}
+			}
+		}
+		smallJobs->pop_front();
+		return;
+	}
+}
+
+
+
+
 Scheduler::~Scheduler() {
     delete mediumJobs;
     delete largeJobs;
     delete hugeJobs;
+	delete smallJobs;
 }
 
 
