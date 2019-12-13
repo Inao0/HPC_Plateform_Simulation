@@ -5,10 +5,13 @@
 
 #include <limits>
 #include "AbstractScheduler.h"
+#include "JobsSizes.h"
 
 /*class JobQueue;*/
 
 class User;
+
+class JobsSizes;
 
 // the Customer class (in this example patients)
 class AbstractJob {
@@ -66,7 +69,7 @@ public:
         AbstractJob::user = user;
     }
 
-    virtual void insertIn(AbstractSimulator* simulator, Scheduler *scheduler) = 0;
+    virtual void insertIn(AbstractSimulator *simulator, Scheduler *scheduler) = 0;
 
     virtual int maxNodes() = 0;
 
@@ -76,99 +79,87 @@ public:
 
     virtual void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler) = 0;
 
+    /*
+     * Rank by priority
+     */
+    friend bool operator<(const AbstractJob &l, const AbstractJob &r) {
+        return l.priority()
+               < r.priority(); // keep the same order
+    }
+
+
+    double priority() const;
+
 };
 
 class LargeJob : public AbstractJob {
 private:
-    static int maxNumberOfNode; //TODO adapt to number of Node in the HPC plateform
-    static double maximumTime;
-
+    string type = "Large";
 public:
-    virtual void insertIn(AbstractSimulator *simulator, Scheduler *scheduler);
+    void insertIn(AbstractSimulator *simulator, Scheduler *scheduler);
 
-    int maxNodes() { return maxNumberOfNode; };
+    int maxNodes() { return JobsSizes::largeMaxNumberOfNode; };
 
-    double maxTime() {
-        return maximumTime;
-    };
+    double maxTime() { return JobsSizes::largeMaximumTime; };
 
-    string getType() { return "Large"; };
+    void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler);
 
-    virtual void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler) ;
+    string getType() { return type; };
 };
 
 
 class MediumJob : public AbstractJob {
 private:
-    static int maxNumberOfNode; //TODO adapt to number of Node in the HPC plateform
-    static double maximumTime;
     string type = "Medium";
 public:
 
     void insertIn(AbstractSimulator *simulator, Scheduler *scheduler);
 
-    int maxNodes() {
-        return maxNumberOfNode;
-    };
+    int maxNodes() { return JobsSizes::mediumMaxNumberOfNode; };
 
-    double maxTime() {
-        return maximumTime;
-    };
+    double maxTime() { return JobsSizes::mediumMaximumTime; };
 
-    string getType() { return "Medium"; };
+    string getType() { return type; };
+
     /*
      * Assume that the job that you are trying to execute is the first in his queue
      */
-    virtual void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler);
+    void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler);
 };
 
 class SmallJob : public AbstractJob {
 private:
-	static int maxNumberOfNode; //TODO adapt to number of Node in the HPC plateform
-	static double maximumTime;
-	string type = "Small";
+    string type = "Small";
 public:
 
-	void insertIn(AbstractSimulator* simulator, Scheduler* scheduler);
+    void insertIn(AbstractSimulator *simulator, Scheduler *scheduler);
 
-	int maxNodes() {
-		return maxNumberOfNode;
-	};
+    int maxNodes() { return JobsSizes::smallMaxNumberOfNode; };
 
-	double maxTime() {
-		return maximumTime;
-	};
+    double maxTime() { return JobsSizes::smallMaximumTime; };
 
-	string getType() { return "Small"; };
-	/*
-	 * Assume that the job that you are trying to execute is the first in his queue
-	 */
-	virtual void tryToExecute(AbstractSimulator* simulator, Scheduler* scheduler);
+    /*
+     * Assume that the job that you are trying to execute is the first in his queue
+     */
+    void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler);
+
+    string getType() { return type; };
 };
-
-
-
 
 
 class HugeJob : public AbstractJob {
 private:
-    static int maxNumberOfNode; //TODO adapt to number of Node in the HPC plateform
-    static double maximumTime; // From friday 5 pm to monday 9am
     string type = "Huge";
 public:
     void insertIn(AbstractSimulator *simulator, Scheduler *scheduler);
 
-    int maxNodes() {
-        maxNumberOfNode = 6;
-        return maxNumberOfNode;
-    };
+    int maxNodes() { return JobsSizes::hugeMaxNumberOfNode; };
 
-    double maxTime() {
-        maximumTime = 64;
-        return maximumTime;
-    };
+    double maxTime() { return JobsSizes::hugeMaximumTime; };
 
-    string getType() { return "Huge"; };
+    string getType() { return type; };
+
+    void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler);
 };
 
 typedef AbstractJob *(*CreateJobFn)();

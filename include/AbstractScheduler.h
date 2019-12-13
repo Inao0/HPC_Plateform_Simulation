@@ -34,6 +34,7 @@ public:
     void tryToExecuteNextLargeJob(AbstractSimulator* simulator);
     void tryToExecuteNextMediumJob(AbstractSimulator* simulator);
 	void tryToExecuteNextSmallJob(AbstractSimulator* simulator);
+    void tryToExecuteNextHugeJobs(AbstractSimulator *simulator);
     Scheduler();
     Scheduler(const Scheduler &scheduler) = delete;
     Scheduler &operator=(const Scheduler &scheduler) = delete;
@@ -49,10 +50,11 @@ public:
     void insertMediumJob(AbstractSimulator *simulator, MediumJob *job);
 	void insertSmallJob(AbstractSimulator* simulator, SmallJob* job);
     void insertLargeJob(AbstractSimulator *simulator, LargeJob *job);
-    void insertHugeJob(AbstractSimulator *simulator, HugeJob *job) {
-        hugeJobs->push_back(job);
-    };//TODO à implémenter pour de vrai
+    void insertHugeJob(AbstractSimulator *simulator, HugeJob *job) ;
 
+    void tryToExecuteNextJobs(AbstractSimulator *pSimulator);
+
+    int totalOfNonHugeJobsWaiting();
 };
 
 #endif //SUPERCOMPUTERSIMULATION_ABSTRACTSCHEDULER_H

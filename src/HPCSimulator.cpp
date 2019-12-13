@@ -2,23 +2,31 @@
 #include "../include/AbstractScheduler.h"
 #include "../include/User.h"
 #include "../include/Student.h"
+#include "../include/weekendEvent.h"
 #include <cmath>
 
 void HPCSimulator::start() {
+    auto* scheduler = new Scheduler();
 
 	events = new ListQueue();
+    int numberOfWeeks = 4;
+    auto *weekendBegin = new WeekendBegin(numberOfWeeks, scheduler);
+    auto *weekendEnd = new WeekendEnd(numberOfWeeks, scheduler);
+    insert(weekendBegin);
+    insert(weekendEnd);
 
 	/* Create the generator, queue, and simulator */
 	/* Connect them together. */
-	Node* node1 = new Node();
-    Node* node2 = new Node();
-    Node* node3 = new Node();
-	auto* scheduler = new Scheduler();
-	auto *curriculum1 = new Curriculum(1.5,3);
-    auto *curriculum2 = new Curriculum(3,4);
+	std::vector<Node*> nodes;
+    for (int i = 0; i < JobsSizes::TotalNumberOfNodes ; ++i) {
+        nodes.push_back(new Node());
+    }
+
+	auto *curriculum1 = new Curriculum(50,12);
+    auto *curriculum2 = new Curriculum(60,24);
 
 	auto* user1 = new Student(curriculum1);
-	auto* user2 = new Student(curriculum2);
+	auto* user2 = new Student(curriculum1);
 	auto* user3 = new Student(curriculum2);
 
     cout<<" End User initialisation"<<std::endl;
@@ -26,16 +34,10 @@ void HPCSimulator::start() {
 	user2->addScheduler(scheduler);
 	user3->addScheduler(scheduler);
     cout<<" End User initialisation"<<std::endl;
-    scheduler->addFreeNode(this, node1);
-    cout<<" End User initialisation"<<std::endl;
-    scheduler->addFreeNode(this, node2);
-    cout<<" End User initialisation"<<std::endl;
-    scheduler->addFreeNode(this, node3);
-    cout<<" End User initialisation"<<std::endl;
-	node1->addScheduler(scheduler);
-	node2->addScheduler(scheduler);
-	node3->addScheduler(scheduler);
-    cout<<" End HPC initialisation"<<std::endl;
+    for (auto &node : nodes) {
+        scheduler->addFreeNode(this, node);
+        node->addScheduler(scheduler);
+    }
 	/* Start the generator by creating one customer immediately */
 
 	insert(user1);
@@ -46,19 +48,20 @@ void HPCSimulator::start() {
 
 	doAllEvents();
 
-	node1->getStats();
-	node2->getStats();
-
 	// free the memory, note that events is freed in the base class destructor
-	delete node1;
-	delete node2;
-	delete node3;
-	delete curriculum1;
+    for (int i = 0; i < nodes.size() ; ++i) {
+        Node* node = nodes.back();
+        nodes.pop_back();
+        delete node;
+    }
+    delete curriculum1;
 	delete curriculum2;
 	delete scheduler;
 	delete user1;
 	delete user2;
 	delete user3;
+	delete weekendBegin;
+	delete weekendEnd;
 
 
 }
