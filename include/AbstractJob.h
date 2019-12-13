@@ -122,6 +122,33 @@ public:
     virtual void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler);
 };
 
+class SmallJob : public AbstractJob {
+private:
+	static int maxNumberOfNode; //TODO adapt to number of Node in the HPC plateform
+	static double maximumTime;
+	string type = "Small";
+public:
+
+	void insertIn(AbstractSimulator* simulator, Scheduler* scheduler);
+
+	int maxNodes() {
+		return maxNumberOfNode;
+	};
+
+	double maxTime() {
+		return maximumTime;
+	};
+
+	string getType() { return "Small"; };
+	/*
+	 * Assume that the job that you are trying to execute is the first in his queue
+	 */
+	virtual void tryToExecute(AbstractSimulator* simulator, Scheduler* scheduler);
+};
+
+
+
+
 
 class HugeJob : public AbstractJob {
 private:
