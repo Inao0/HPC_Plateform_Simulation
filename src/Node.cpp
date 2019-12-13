@@ -21,6 +21,15 @@ string convertTime(double t) {
     return s;
 }
 
+/*
+ * Assuming that the simulation start at Monday 9 AM.
+ */
+bool isDuringWeekend(double time){
+    const double numberOfHourInTheWeek =168;
+    const double startingWeekendTime=104;
+    return (remainder(time,numberOfHourInTheWeek)>startingWeekendTime);
+}
+
 
 Node::Node() : Event() {
     jobBeingExecuted = nullptr;
