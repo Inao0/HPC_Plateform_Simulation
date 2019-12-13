@@ -15,7 +15,7 @@ class AbstractJob;
 * and releases it.
 */
 class Node : public Event {
-private:
+protected:
 	AbstractJob* jobBeingExecuted;
     /*JobQueue* queue;*/
     Scheduler* scheduler;
@@ -42,4 +42,10 @@ public:
 	void insert(AbstractSimulator* simulator, AbstractJob* job);
 	void printMessage();
 	void getStats() const;
+	virtual void addFreeNodeToScheduler(AbstractSimulator *Simulator);
+};
+
+class ReservedForMediumJobNode : public Node {
+public:
+    void addFreeNodeToScheduler(AbstractSimulator *simulator) override;
 };

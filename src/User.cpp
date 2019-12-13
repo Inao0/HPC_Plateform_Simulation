@@ -2,7 +2,7 @@
 
 User::User(double time) : Event(time) { userId = ++numOfUsers; }// Used to be numOfJobs = 0;
 
-int User::numOfJobs = 0;
+
 int User::numOfUsers = 0;
 
 /**
@@ -34,7 +34,8 @@ void User::execute(AbstractSimulator *simulator) {
             std::cout << "Job " << job->getId() << " requires " << job->getNumberOfNodes() << " nodes\n";
 
             // insert the customer into the queue
-            scheduler->insert(simulator, job, this);
+            job->insertIn(simulator, scheduler);
+
 
             time += Random::exponential(12);
 
@@ -42,7 +43,8 @@ void User::execute(AbstractSimulator *simulator) {
             budget -= (executionTime * scheduler->costPerHourPerNode()) * numberOfNodes;
             currentlyUsedNumberOfNodes += numberOfNodes;
             std::cout << "User " << userId << " is using " << currentlyUsedNumberOfNodes << " out of "
-                      << instantaneousMaxNumberOfNodes << "\n";
+                      << instantaneousMaxNumberOfNodes << "\n"
+                      <<" Budget left " << convertTime(budgetLeft())<<"\n";
         } else {
             std::cout << "User " << userId << " has not enough budget left for is next job. Budget left : "
                       << budgetLeft() << " / Next Job : " << convertTime(executionTime) << " on " << numberOfNodes
@@ -53,7 +55,8 @@ void User::execute(AbstractSimulator *simulator) {
         std::cout << "User " << userId << " has not enough instantaneous nodes for this job. \n"
                   << "User will try to submit an other job at :" << convertTime(time) << ". \n"
                   << "New Nodes required : " << numberOfNodes << "/ currently used nodes :"
-                  << currentlyUsedNumberOfNodes << "/ max :" << instantaneousMaxNumberOfNodes << "\n";
+                  << currentlyUsedNumberOfNodes << "/ max :" << instantaneousMaxNumberOfNodes << "\n"
+                <<" Budget left " << convertTime(budgetLeft())<<"\n";;
 
         simulator->insert(this);
     }

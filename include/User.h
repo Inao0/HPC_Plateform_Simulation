@@ -13,7 +13,6 @@ protected:
     int instantaneousMaxNumberOfNodes = 4;
     int currentlyUsedNumberOfNodes = 0;
     Scheduler *scheduler;
-    static int numOfJobs; // number of customers generated
     static int numOfUsers;
     int userId;
 public:

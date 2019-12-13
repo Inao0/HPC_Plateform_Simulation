@@ -53,9 +53,15 @@ void Node::execute(AbstractSimulator *simulator) {
     printMessage();
     (jobBeingExecuted->getUser())->reduceNumberOfCurrentlyUsedNodeBy(1);
     jobBeingExecuted = nullptr;
-    scheduler->addFreeNode(simulator, this);
+    addFreeNodeToScheduler(simulator);
 }
 
+void Node::addFreeNodeToScheduler(AbstractSimulator * simulator) {
+    scheduler->addFreeNode(simulator, this);
+}
+void ReservedForMediumJobNode::addFreeNodeToScheduler(AbstractSimulator * simulator) {
+    scheduler->addFreeMediumNode(simulator, this);
+}
 
 bool Node::isAvailable() {
     return (jobBeingExecuted == 0);
@@ -92,4 +98,5 @@ void Node::printMessage() {
     waitingTimeQueue += time - jobBeingExecuted->getExecutionTime() - jobBeingExecuted->getSubmittingTime();
     //queueSize += queue->size();
 }
+
 
