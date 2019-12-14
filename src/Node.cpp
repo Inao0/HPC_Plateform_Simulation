@@ -22,6 +22,7 @@ string convertTime(double t) {
 }
 
 
+
 Node::Node() : Event() {
     jobBeingExecuted = nullptr;
     serviceTime = waitingTime = 0.0;
@@ -59,6 +60,10 @@ void Node::execute(AbstractSimulator *simulator) {
 void Node::addFreeNodeToScheduler(AbstractSimulator * simulator) {
     scheduler->addFreeNode(simulator, this);
 }
+void ReservedForSmallJobNode::addFreeNodeToScheduler(AbstractSimulator *simulator) {
+    scheduler->addFreeSmallNode(simulator,this);
+}
+
 void ReservedForMediumJobNode::addFreeNodeToScheduler(AbstractSimulator * simulator) {
     scheduler->addFreeMediumNode(simulator, this);
 }
@@ -84,8 +89,9 @@ void Node::insert(AbstractSimulator *simulator, AbstractJob *job) {
     num++;
 }
 
+
 void Node::printMessage() {
-    std::cout << "Finished executing " << jobBeingExecuted->getId() << " at time " << convertTime(time) << "\n";
+    std::cout << "Finished executing " << jobBeingExecuted->getId() << " (" <<jobBeingExecuted->getType()<<") at time " << convertTime(time) << "\n";
     std::cout << "Execution time was " << convertTime(jobBeingExecuted->getExecutionTime()) << "\n";
     std::cout << "Job waiting time " << convertTime(time - jobBeingExecuted->getSubmittingTime()) << "\n";
     std::cout << "Job waiting time in queue "
@@ -98,5 +104,3 @@ void Node::printMessage() {
     waitingTimeQueue += time - jobBeingExecuted->getExecutionTime() - jobBeingExecuted->getSubmittingTime();
     //queueSize += queue->size();
 }
-
-

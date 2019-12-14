@@ -49,3 +49,8 @@ class ReservedForMediumJobNode : public Node {
 public:
     void addFreeNodeToScheduler(AbstractSimulator *simulator) override;
 };
+
+class ReservedForSmallJobNode : public Node {
+public:
+    void addFreeNodeToScheduler(AbstractSimulator *simulator) override;
+};
