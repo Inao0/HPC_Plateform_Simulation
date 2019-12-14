@@ -1,0 +1,28 @@
+#            This is the configuration file for the simulator      #
+# Any values that are not present will be assigned a default value #
+
+# users create. 0=small, 1=medium, 2=large, 3=huge, 4=GPU  #
+
+Users:
+Students:
+Number=4
+AllocationTime=2000
+JobTypesAvailable=0 1 4
+Groups:
+Group 1:
+HowMany=5
+AdditionalAllocationLimit=20
+AdditionalJobTypes=0 2
+IT:
+HowMany=1
+AllocationLimit=960
+JobTypesAvailable=3
+Researcher:
+HowMany=1
+AllocationLimit=270
+JobTypesAvailable=0 2 3
+
+
+Simulator:
+Nodes=128
+GPU=8
