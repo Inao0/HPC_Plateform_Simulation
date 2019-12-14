@@ -19,7 +19,7 @@ Scheduler::Scheduler() {
     smallJobs = new std::list<SmallJob *>;
     largeJobs = new std::list<LargeJob *>;
     hugeJobs = new std::list<HugeJob *>;
-
+    gpuJobs = new std::list<GpuJob *>;
 
 }
 
@@ -35,6 +35,13 @@ void Scheduler::addFreeSmallNode(AbstractSimulator *simulator, ReservedForSmallJ
     this->freeSmallNodes.push(node);
     if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::smallMaximumTime)) {
         tryToExecuteNextSmallJob(simulator);
+    }
+}
+
+void Scheduler::addFreeGpuNode(AbstractSimulator *simulator, GpuNode *node) {
+    this->freeGpuNodes.push(node);
+    if (gpuJobs->front() != nullptr && isDuringWeekend(simulator->now() + gpuJobs->front()->maxTime())) {// TODO MODIFY{
+        tryToExecuteNextGpuJob(simulator);
     }
 }
 
@@ -85,6 +92,15 @@ void Scheduler::insertSmallJob(AbstractSimulator *simulator, SmallJob *job) {
     }
 }
 
+void Scheduler::insertGpuJob(AbstractSimulator *simulator, GpuJob *job) {
+    if (gpuJobs->empty()) {
+        gpuJobs->push_back(job);
+        tryToExecuteNextGpuJob(simulator);
+    } else {
+        gpuJobs->push_back(job);
+    }
+}
+
 
 void Scheduler::insertLargeJob(class AbstractSimulator *simulator, class LargeJob *job) {
     if (!isDuringWeekend(simulator->now()) && largeJobs->empty() &&
@@ -109,6 +125,9 @@ AbstractJob *Scheduler::nextJob() {
     if (!largeJobs->empty()) {
         nextJobs.push_back(largeJobs->front());
     }
+    if (!gpuJobs->empty()) {
+        nextJobs.push_back(gpuJobs->front());
+    }
     if (!smallJobs->empty()) {
         nextJobs.push_back(smallJobs->front());
     }
@@ -122,7 +141,7 @@ AbstractJob *Scheduler::nextJob() {
 
 void Scheduler::tryToExecuteNextLargeJob(AbstractSimulator *simulator) { //TODO : IMPROVE
     LargeJob *nextLargeJob = largeJobs->front();
-    if (freeNodes.size() >= nextLargeJob->getNumberOfNodes()) {
+    if (nextLargeJob != nullptr && freeNodes.size() >= nextLargeJob->getNumberOfNodes()) {
         for (int i = 0; i < nextLargeJob->getNumberOfNodes(); ++i) {
             Node *node = freeNodes.front();
             freeNodes.pop();
@@ -134,7 +153,7 @@ void Scheduler::tryToExecuteNextLargeJob(AbstractSimulator *simulator) { //TODO 
 
 void Scheduler::tryToExecuteNextMediumJob(AbstractSimulator *simulator) { //TODO : IMPROVE
     AbstractJob *nextMediumJob = mediumJobs->front();
-    if (nextMediumJob != NULL && freeMediumNodes.size() >= nextMediumJob->getNumberOfNodes()) {
+    if (nextMediumJob != nullptr && freeMediumNodes.size() >= nextMediumJob->getNumberOfNodes()) {
         for (int i = 0; i < nextMediumJob->getNumberOfNodes(); ++i) {
             Node *node = freeMediumNodes.front();
             freeMediumNodes.pop();
@@ -164,9 +183,22 @@ void Scheduler::tryToExecuteNextMediumJob(AbstractSimulator *simulator) { //TODO
 }
 
 
+void Scheduler::tryToExecuteNextGpuJob(AbstractSimulator *simulator) {
+    AbstractJob *nextGPUJob = gpuJobs->front();
+    if (nextGPUJob != nullptr && freeGpuNodes.size() >= nextGPUJob->getNumberOfNodes()) {
+        for (int i = 0; i < nextGPUJob->getNumberOfNodes(); ++i) {
+            Node *node = freeNodes.front();
+            freeNodes.pop();
+            node->insert(simulator, nextGPUJob);
+        }
+        gpuJobs->pop_front();
+    }
+
+}
+
 void Scheduler::tryToExecuteNextSmallJob(AbstractSimulator *simulator) { //TODO : IMPROVE
     AbstractJob *nextSmallJob = smallJobs->front();
-    if (nextSmallJob != NULL && freeSmallNodes.size() >= nextSmallJob->getNumberOfNodes()) {
+    if (nextSmallJob != nullptr && freeSmallNodes.size() >= nextSmallJob->getNumberOfNodes()) {
         for (int i = 0; i < nextSmallJob->getNumberOfNodes(); ++i) {
             Node *node = freeSmallNodes.front();
             freeSmallNodes.pop();
@@ -174,7 +206,7 @@ void Scheduler::tryToExecuteNextSmallJob(AbstractSimulator *simulator) { //TODO 
         }
         smallJobs->pop_front();
         return;
-    } else if (nextSmallJob != NULL &&
+    } else if (nextSmallJob != nullptr &&
                (freeSmallNodes.size() + freeNodes.size()) >= nextSmallJob->getNumberOfNodes() &&
                nextSmallJob == nextJob()) {
         for (int i = 0; i < nextSmallJob->getNumberOfNodes(); ++i) {

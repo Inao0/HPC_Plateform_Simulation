@@ -9,6 +9,7 @@
 class JobsSizes {
 public:
     static const int TotalNumberOfNodes = 128;
+    static const int NumberOfGpuNodes = 8;
 
     const static int smallMaxNumberOfNode = 1;
     constexpr static double smallMaximumTime = 2;
@@ -23,6 +24,8 @@ public:
     constexpr static double hugeMaximumTime = 64;
 
 
+    constexpr const static double gpuMaximumTime = largeMaximumTime;
+    const static int gpuMaxNumberOfNode = NumberOfGpuNodes;
 };
 
 
