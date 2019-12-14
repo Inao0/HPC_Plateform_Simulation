@@ -22,8 +22,8 @@ void HPCSimulator::start() {
         nodes.push_back(new Node());
     }
 
-	auto *curriculum1 = new Curriculum(50,12);
-    auto *curriculum2 = new Curriculum(60,24);
+	auto *curriculum1 = new Curriculum(50,20);
+    auto *curriculum2 = new Curriculum(4000,120);
 
 	auto* user1 = new Student(curriculum1);
 	auto* user2 = new Student(curriculum1);
