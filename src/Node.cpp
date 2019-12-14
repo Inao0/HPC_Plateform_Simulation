@@ -68,9 +68,14 @@ void ReservedForMediumJobNode::addFreeNodeToScheduler(AbstractSimulator * simula
     scheduler->addFreeMediumNode(simulator, this);
 }
 
+void GpuNode::addFreeNodeToScheduler(AbstractSimulator *simulator) {
+    scheduler->addFreeGpuNode(simulator,this);
+}
+
 bool Node::isAvailable() {
     return (jobBeingExecuted == 0);
 }
+
 
 /**
 * Start a customer's service.  The simulator must be passed in
@@ -88,7 +93,6 @@ void Node::insert(AbstractSimulator *simulator, AbstractJob *job) {
     simulator->insert(this);
     num++;
 }
-
 
 void Node::printMessage() {
     std::cout << "Finished executing " << jobBeingExecuted->getId() << " (" <<jobBeingExecuted->getType()<<") at time " << convertTime(time) << "\n";
