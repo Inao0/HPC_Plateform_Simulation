@@ -13,6 +13,7 @@ public:
 	HPCSimulator() = default;
 	void initialisation (string filename);
 	void start();
+	int eventQueueSize();
 };
 
 

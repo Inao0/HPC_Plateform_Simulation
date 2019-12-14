@@ -39,5 +39,6 @@ public:
 	virtual void doAllEvents() = 0;
 	virtual double now() = 0;
 	virtual ~AbstractSimulator();
+    int eventsSize();//added function
 };
 
