@@ -9,16 +9,26 @@
 */
 class User : public Event {
 protected:
-    double budget = 1;
-    int instantaneousMaxNumberOfNodes = 4;
+    double budget = 0;
+    int instantaneousMaxNumberOfNodes = JobsSizes::TotalNumberOfNodes;
     int currentlyUsedNumberOfNodes = 0;
     Scheduler *scheduler;
     static int numOfUsers;
     int userId;
+    double meanTimeToNextJob = 12;// by default a user will try to generate a job every 12 hours
+
 public:
+    double getMeanTimeToNextJob() const;
+
+    void setMeanTimeToNextJob(double meanTimeToNextJob);
+
     int getUserId() const;
 
-    User(double time = 0.0);
+    User();
+
+    User(double meanTimeBetweenToJobs);
+
+    User(double meanTimeBetweenToJobs, double firstJobTime);
 
     User(const User &g) = delete;
 
@@ -28,9 +38,9 @@ public:
 
     void addScheduler(Scheduler *scheduler) { this->scheduler = scheduler; };
 
-    double budgetLeft();
+    virtual double budgetLeft();
 
-    void removeFromBudget(double amountToRemove);
+    virtual void removeFromBudget(double amountToRemove);
 
     void reduceNumberOfCurrentlyUsedNodeBy(int numberOfNodes) {
         currentlyUsedNumberOfNodes -= numberOfNodes;

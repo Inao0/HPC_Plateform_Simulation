@@ -9,7 +9,7 @@ public:
 	static double exponential(double mean) {
         std::random_device rd;
         std::mt19937 rnd_gen(rd());
-        std::exponential_distribution<> rng(mean);
+        std::exponential_distribution<> rng(1/mean);
 		return rng(rnd_gen);
 	}
 

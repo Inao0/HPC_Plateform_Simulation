@@ -11,9 +11,15 @@
 
 class Student : public User {
 private:
-    Curriculum* curriculum;
+    Curriculum *curriculum;
 public:
-    Student(Curriculum* curriculum, double time = 0.0);
+    Student() = delete;
+
+    Student(Curriculum *curriculum);
+
+    Student(Curriculum *curriculum, double meanTimeBetweenTwoJobs);
+
+    Student(Curriculum *curriculum, double meanTimeBetweenTwoJobs, double firstJobTime);
 
     Student(const Student &g) = delete;
 
