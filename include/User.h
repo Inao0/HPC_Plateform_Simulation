@@ -15,10 +15,20 @@ protected:
     Scheduler *scheduler;
     static int numOfUsers;
     int userId;
+    double meanTimeToNextJob = 4;// by default a user will try to generate a job every 4 hours
+
 public:
+    double getMeanTimeToNextJob() const;
+
+    void setMeanTimeToNextJob(double meanTimeToNextJob);
+
     int getUserId() const;
 
-    User(double time = 0.0);
+    User();
+
+    User(double meanTimeBetweenToJobs);
+
+    User(double meanTimeBetweenToJobs, double firstJobTime);
 
     User(const User &g) = delete;
 
