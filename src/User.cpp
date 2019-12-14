@@ -27,7 +27,7 @@ void User::execute(AbstractSimulator *simulator) {
     job->generateRandomRequirements();
     if (currentlyUsedNumberOfNodes + job->getNumberOfNodes() <= instantaneousMaxNumberOfNodes) {
         // keep the simulator going until next planned job is too large
-        //TODO assumption
+        //TODO assumption + GPU NODES
         if (budgetLeft() - ((job->getExecutionTime() * scheduler->costPerHourPerNode()) * job->getNumberOfNodes()) >=
             0) {
             job->setSubmittingTime(time);

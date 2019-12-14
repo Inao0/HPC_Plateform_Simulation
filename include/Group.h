@@ -1,16 +1,20 @@
-#ifndef SUPERCOMPUTERSIMULATION_CURRICULUM_H
-#define SUPERCOMPUTERSIMULATION_CURRICULUM_H
+#ifndef SUPERCOMPUTERSIMULATION_GROUP_H
+#define SUPERCOMPUTERSIMULATION_GROUP_H
 
 
 class Group {
-	const double cumulativeCapPerGroupInNodeHour;
-	const int individualGrantsPerResearcherInNodes;
+    double groupRessourcesAllocationInNodeHours;
+
 public:
-	int getIndividualGrantsPerResearcherInNodes() { return individualGrantsPerResearcherInNodes; };
 
-	double getGrantsInNodeHour() { return cumulativeCapPerGroupInNodeHour; };
+    double getGroupRessourcesInNodeHour() { return groupRessourcesAllocationInNodeHours; };
 
-	Group(double cumulativeCap, int individualCap) : cumulativeCapPerGroupInNodeHour(cumulativeCap),
-		individualGrantsPerResearcherInNodes(individualCap) {};
-	Group() = delete;
+    void removeFromGroupRessources(
+            double nodeHoursToRemove) { groupRessourcesAllocationInNodeHours -= nodeHoursToRemove; }
+
+    Group(double cumulativeCap) : groupRessourcesAllocationInNodeHours(cumulativeCap) {};
+
+    Group() = delete;
 };
+
+#endif //SUPERCOMPUTERSIMULATION_GROUP_H

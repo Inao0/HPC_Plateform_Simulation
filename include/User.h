@@ -9,8 +9,8 @@
 */
 class User : public Event {
 protected:
-    double budget = 1;
-    int instantaneousMaxNumberOfNodes = 4;
+    double budget = 0;
+    int instantaneousMaxNumberOfNodes = JobsSizes::TotalNumberOfNodes;
     int currentlyUsedNumberOfNodes = 0;
     Scheduler *scheduler;
     static int numOfUsers;
@@ -38,9 +38,9 @@ public:
 
     void addScheduler(Scheduler *scheduler) { this->scheduler = scheduler; };
 
-    double budgetLeft();
+    virtual double budgetLeft();
 
-    void removeFromBudget(double amountToRemove);
+    virtual void removeFromBudget(double amountToRemove);
 
     void reduceNumberOfCurrentlyUsedNodeBy(int numberOfNodes) {
         currentlyUsedNumberOfNodes -= numberOfNodes;

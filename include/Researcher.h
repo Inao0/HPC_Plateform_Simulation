@@ -1,6 +1,6 @@
 
-#ifndef SUPERCOMPUTERSIMULATION_STUDENT_H
-#define SUPERCOMPUTERSIMULATION_STUDENT_H
+#ifndef SUPERCOMPUTERSIMULATION_RESEARCHER_H
+#define SUPERCOMPUTERSIMULATION_RESEARCHER_H
 
 
 #include "User.h"
@@ -8,15 +8,27 @@
 
 class Researcher : public User {
 private:
-	Group* group;
+    Group *group;
 public:
-	Researcher(Group* group ,double time = 0.0);
+    Researcher() = delete;
 
-	Researcher(const Researcher & g) = delete;
+    Researcher(Group *group);
 
-	Researcher& operator=(const Researcher& g) = delete;
+    Researcher(Group *group, double meanTimeBetweenTwoJobs);
+
+    Researcher(Group *group, double meanTimeBetweenTwoJobs, double firstJobTime);
+
+    Researcher(const Researcher &g) = delete;
+
+    Researcher &operator=(const Researcher &g) = delete;
+
+    void addIndividualGrant(double grantInNodeHours) { budget += grantInNodeHours;};
+
+    double budgetLeft() override;
+
+    void removeFromBudget(double amountToRemove) override;
 
 };
 
 
-#endif //SUPERCOMPUTERSIMULATION_STUDENT_H
+#endif //SUPERCOMPUTERSIMULATION_RESEARCHER_H
