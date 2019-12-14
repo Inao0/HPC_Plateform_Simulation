@@ -3,40 +3,58 @@
 
 #include <queue>
 #include "../include/Node.h"
-#include "../include/Queue.h"
+#include "AbstractJob.h"
 #include <list>
 
 
 class User;
 
+class MediumJob;
+
+class SmallJob;
+
+class LargeJob;
+
+class HugeJob;
+
 class Scheduler {
 private:
-    std::list<Job *> *jobs; //maybe should use a heap for ordering according to priority maybe heaps for different jobs and then take the one with the highest priority ?
-    std::queue<Node *> freeNodes;
-
+    std::list<MediumJob *> *mediumJobs{};//maybe should use a heap for ordering according to priority maybe heaps for different jobs and then take the one with the highest priority ?
+	std::list<SmallJob*>* smallJobs{};
+	std::list<LargeJob *> *largeJobs{}; //maybe should use a heap for ordering according to priority maybe heaps for different jobs and then take the one with the highest priority ?
+    std::list<HugeJob *> *hugeJobs{}; //maybe should use a heap for ordering according to priority maybe heaps for different jobs and then take the one with the highest priority ?
+    std::queue<Node *> freeMediumNodes; //reserved for medium nodes
+	std::queue<Node*> freeSmallNodes;
+	std::queue<Node *> freeNodes;
+    std::queue<Node *> freeHugeNodes; //only for the weekend
+    double const costOneHourOneNode = 1;
 
 public:
+
+    void tryToExecuteNextLargeJob(AbstractSimulator* simulator);
+    void tryToExecuteNextMediumJob(AbstractSimulator* simulator);
+	void tryToExecuteNextSmallJob(AbstractSimulator* simulator);
+    void tryToExecuteNextHugeJobs(AbstractSimulator *simulator);
     Scheduler();
-
     Scheduler(const Scheduler &scheduler) = delete;
-
     Scheduler &operator=(const Scheduler &scheduler) = delete;
-
     ~Scheduler();
 
-    void insert(AbstractSimulator *simulator, Job *job, User *user);
-
-    /**
-     * return the first customer in the queue
-    */
-    Job *nextJob();
-
     void addFreeNode(AbstractSimulator *simulator, Node *node);
-
+    void addFreeMediumNode(AbstractSimulator *simulator, ReservedForMediumJobNode* node);
+	void addFreeSmallNode(AbstractSimulator* simulator, ReservedForSmallJobNode* node);
     double costPerHourPerNode();
 
-    double const costOneHourOneNode = 1;
+    AbstractJob* nextJob();
+
+    void insertMediumJob(AbstractSimulator *simulator, MediumJob *job);
+	void insertSmallJob(AbstractSimulator* simulator, SmallJob* job);
+    void insertLargeJob(AbstractSimulator *simulator, LargeJob *job);
+    void insertHugeJob(AbstractSimulator *simulator, HugeJob *job) ;
+
+    void tryToExecuteNextJobs(AbstractSimulator *pSimulator);
+
+    int totalOfNonHugeJobsWaiting();
 };
 
 #endif //SUPERCOMPUTERSIMULATION_ABSTRACTSCHEDULER_H
-

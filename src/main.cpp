@@ -1,9 +1,10 @@
 
 #include "../include/HPCSimulator.h"
 
-int main()
-{
-		HPCSimulator b;
-		b.start();
-		return 0;
+int main() {
+    cout << " HPC simulator initialisation" << std::endl;
+    HPCSimulator b;
+    cout << " Starting" << std::endl;
+    b.start();
+    return 0;
 }

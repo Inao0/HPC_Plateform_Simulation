@@ -13,7 +13,6 @@ protected:
     int instantaneousMaxNumberOfNodes = 4;
     int currentlyUsedNumberOfNodes = 0;
     Scheduler *scheduler;
-    static int numOfJobs; // number of customers generated
     static int numOfUsers;
     int userId;
 public:
@@ -30,6 +29,8 @@ public:
     void addScheduler(Scheduler *scheduler) { this->scheduler = scheduler; };
 
     double budgetLeft();
+
+    void removeFromBudget(double amountToRemove);
 
     void reduceNumberOfCurrentlyUsedNodeBy(int numberOfNodes) {
         currentlyUsedNumberOfNodes -= numberOfNodes;

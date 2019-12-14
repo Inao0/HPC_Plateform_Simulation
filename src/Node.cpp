@@ -2,6 +2,7 @@
 #include <cmath>
 #include "../include/AbstractScheduler.h"
 #include "../include/User.h"
+#include "../include/AbstractJob.h"
 
 
 // convert the time in seconds to hrs, mins, secs
@@ -19,6 +20,7 @@ string convertTime(double t) {
     string s = to_string(hour) + "hrs:" + to_string(min) + "mins:" + to_string(sec) + "secs";
     return s;
 }
+
 
 
 Node::Node() : Event() {
@@ -52,9 +54,19 @@ void Node::execute(AbstractSimulator *simulator) {
     printMessage();
     (jobBeingExecuted->getUser())->reduceNumberOfCurrentlyUsedNodeBy(1);
     jobBeingExecuted = nullptr;
-    scheduler->addFreeNode(simulator, this);
+    addFreeNodeToScheduler(simulator);
 }
 
+void Node::addFreeNodeToScheduler(AbstractSimulator * simulator) {
+    scheduler->addFreeNode(simulator, this);
+}
+void ReservedForSmallJobNode::addFreeNodeToScheduler(AbstractSimulator *simulator) {
+    scheduler->addFreeSmallNode(simulator,this);
+}
+
+void ReservedForMediumJobNode::addFreeNodeToScheduler(AbstractSimulator * simulator) {
+    scheduler->addFreeMediumNode(simulator, this);
+}
 
 bool Node::isAvailable() {
     return (jobBeingExecuted == 0);
@@ -65,7 +77,7 @@ bool Node::isAvailable() {
 * as a parameter so that this can  schedule the time
 * when this server will be done with the customer.
 */
-void Node::insert(AbstractSimulator *simulator, Job *job) {
+void Node::insert(AbstractSimulator *simulator, AbstractJob *job) {
     if (jobBeingExecuted != nullptr) {
         /* Should never reach here */
         std::cout << "Error: I am busy serving someone else" << "\n";
@@ -77,8 +89,9 @@ void Node::insert(AbstractSimulator *simulator, Job *job) {
     num++;
 }
 
+
 void Node::printMessage() {
-    std::cout << "Finished executing " << jobBeingExecuted->getId() << " at time " << convertTime(time) << "\n";
+    std::cout << "Finished executing " << jobBeingExecuted->getId() << " (" <<jobBeingExecuted->getType()<<") at time " << convertTime(time) << "\n";
     std::cout << "Execution time was " << convertTime(jobBeingExecuted->getExecutionTime()) << "\n";
     std::cout << "Job waiting time " << convertTime(time - jobBeingExecuted->getSubmittingTime()) << "\n";
     std::cout << "Job waiting time in queue "
@@ -91,4 +104,3 @@ void Node::printMessage() {
     waitingTimeQueue += time - jobBeingExecuted->getExecutionTime() - jobBeingExecuted->getSubmittingTime();
     //queueSize += queue->size();
 }
-
