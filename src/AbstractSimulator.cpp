@@ -10,3 +10,7 @@ AbstractSimulator::~AbstractSimulator() {
 	delete events; 
 }
 
+int AbstractSimulator::eventsSize() {
+    return events->size();
+}
+

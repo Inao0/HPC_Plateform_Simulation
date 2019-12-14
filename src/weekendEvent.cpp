@@ -8,8 +8,7 @@ void WeekendBegin::execute(AbstractSimulator *simulator) {
     Event::execute(simulator);
 
     std::cout << "Weekend Start" << std::endl;
-    if (simulator->now() + (numberOfHoursInAWeek - numberOfHoursBeforeWeekEnd) <=
-        numberOfWeeksSimulated * numberOfHoursInAWeek) {
+    if (simulator->eventsSize()>1 || scheduler->totalOfNonHugeJobsWaiting()>0) {
         time += numberOfHoursInAWeek;
         simulator->insert(this);
     }
@@ -25,12 +24,16 @@ WeekendBegin::WeekendBegin(int numberOfWeeks, Scheduler *scheduler1) : numberOfW
 void WeekendEnd::execute(AbstractSimulator *simulator) {
     Event::execute(simulator);
     std::cout << "Weekend End" << std::endl;
-    if (simulator->now() <=
-        numberOfWeeksSimulated * numberOfHoursInAWeek) {
+    scheduler->tryToExecuteNextJobs(simulator);
+    if (simulator->eventsSize()>0 ) {
         time += numberOfHoursInAWeek;
+        if (simulator->eventsSize()==1){
+            cout<<"LAST WEEK IS EMPTY \n";
+        }
         simulator->insert(this);
     }
-    scheduler->tryToExecuteNextJobs(simulator);
+
+
 }
 
 WeekendEnd::WeekendEnd(int numberOfWeeks, Scheduler *scheduler1) : numberOfWeeksSimulated(numberOfWeeks),
