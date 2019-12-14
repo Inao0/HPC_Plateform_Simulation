@@ -14,7 +14,7 @@ class AbstractJob;
 * A server that holds a customer for an exponentially distributed amout of time
 * and releases it.
 */
-class Node : public Event {
+class GpuNode : public Event {
 protected:
 	AbstractJob* jobBeingExecuted;
 	/*JobQueue* queue;*/
@@ -26,11 +26,11 @@ protected:
 	int num;
 
 public:
-	Node();
-	Node(const Node& node) = delete;
-	Node& operator=(const Node& node) = delete;
+	GpuNode();
+	GpuNode(const GpuNode& gpunode) = delete;
+	GpuNode& operator=(const GpuNode& gpunode) = delete;
 
-	Node& addScheduler(Scheduler* scheduler);
+	GpuNode& addScheduler(Scheduler* scheduler);
 	void execute(AbstractSimulator* simulator);
 	bool isAvailable();
 
@@ -42,5 +42,5 @@ public:
 	void insert(AbstractSimulator* simulator, AbstractJob* job);
 	void printMessage();
 	void getStats() const;
-	virtual void addFreeNodeToScheduler(AbstractSimulator* Simulator);
+	virtual void addFreeGpuNodeToScheduler(AbstractSimulator* Simulator);
 };

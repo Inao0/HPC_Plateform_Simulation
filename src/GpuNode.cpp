@@ -66,7 +66,7 @@ void ReservedForGpuJobNode::addFreeNodeToScheduler(AbstractSimulator* simulator)
 
 
 
-bool Node::isAvailable() {
+bool GpuNode::isAvailable() {
 	return (jobBeingExecuted == 0);
 }
 
