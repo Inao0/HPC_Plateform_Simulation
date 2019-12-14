@@ -15,7 +15,7 @@ protected:
     Scheduler *scheduler;
     static int numOfUsers;
     int userId;
-    double meanTimeToNextJob = 4;// by default a user will try to generate a job every 4 hours
+    double meanTimeToNextJob = 12;// by default a user will try to generate a job every 12 hours
 
 public:
     double getMeanTimeToNextJob() const;

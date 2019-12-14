@@ -49,9 +49,9 @@ void HPCSimulator::start() {
     }
 	/* Start the generator by creating one customer immediately */
 
-	//insert(user1);
-	//insert(user2);
-	//insert(user3);
+	insert(user1);
+	insert(user2);
+	insert(user3);
 	insert(researcher1);
 	insert(researcher2);
     cout<<"users inserted"<<std::endl;

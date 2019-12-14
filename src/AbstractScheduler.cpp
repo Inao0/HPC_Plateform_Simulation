@@ -9,7 +9,8 @@
 bool isDuringWeekend(double time) {
     const double numberOfHourInTheWeek = 168;
     const double startingWeekendTime = 104;
-    return (remainder(time, numberOfHourInTheWeek) > startingWeekendTime);
+    double mod = fmod(time, numberOfHourInTheWeek);
+    return (mod > startingWeekendTime);
 }
 
 
@@ -25,14 +26,14 @@ Scheduler::Scheduler() {
 
 void Scheduler::addFreeMediumNode(AbstractSimulator *simulator, ReservedForMediumJobNode *node) {
     this->freeMediumNodes.push(node);
-    if (mediumJobs->front() != nullptr && isDuringWeekend(simulator->now() + mediumJobs->front()->maxTime())) {
+    if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::mediumMaximumTime)) {
         tryToExecuteNextMediumJob(simulator);
     }
 }
 
 void Scheduler::addFreeSmallNode(AbstractSimulator *simulator, ReservedForSmallJobNode *node) {
     this->freeSmallNodes.push(node);
-    if (smallJobs->front() != nullptr && isDuringWeekend(simulator->now() + smallJobs->front()->maxTime())) {
+    if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::smallMaximumTime)) {
         tryToExecuteNextSmallJob(simulator);
     }
 }
@@ -40,20 +41,21 @@ void Scheduler::addFreeSmallNode(AbstractSimulator *simulator, ReservedForSmallJ
 void Scheduler::addFreeNode(class AbstractSimulator *simulator, class Node *node) {
     this->freeNodes.push(node);
     AbstractJob *job;
-    if (largeJobs->front() != nullptr && isDuringWeekend(simulator->now() + largeJobs->front()->maxTime())) {
+    if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::largeMaximumTime)) {
         job = nextJob();
         if (job != nullptr) {
             job->tryToExecute(simulator, this);
             return;
         }
-    } else if (mediumJobs->front() != nullptr && isDuringWeekend(simulator->now() + mediumJobs->front()->maxTime())) {
-        if (smallJobs->front() != nullptr && *(smallJobs->front()) < *(mediumJobs->front())) {
+    } else if (!isDuringWeekend(simulator->now()) &&
+               !isDuringWeekend(simulator->now() + JobsSizes::mediumMaximumTime)) {
+        if (mediumJobs->empty() || (!smallJobs->empty() && *(smallJobs->front()) < *(mediumJobs->front()))) {
             tryToExecuteNextSmallJob(simulator);
             return;
         }
         tryToExecuteNextMediumJob(simulator);
         return;
-    } else if (smallJobs->front() != nullptr && isDuringWeekend(simulator->now() + smallJobs->front()->maxTime())) {
+    } else if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::smallMaximumTime)) {
         tryToExecuteNextSmallJob(simulator);
     }
 }
@@ -64,7 +66,8 @@ double Scheduler::costPerHourPerNode() {
 
 
 void Scheduler::insertMediumJob(AbstractSimulator *simulator, MediumJob *job) {
-    if (mediumJobs->empty()) {
+    if (!isDuringWeekend(simulator->now()) && mediumJobs->empty() &&
+        !isDuringWeekend(simulator->now() + JobsSizes::mediumMaximumTime)) {
         mediumJobs->push_back(job);
         tryToExecuteNextMediumJob(simulator);
     } else {
@@ -73,7 +76,8 @@ void Scheduler::insertMediumJob(AbstractSimulator *simulator, MediumJob *job) {
 }
 
 void Scheduler::insertSmallJob(AbstractSimulator *simulator, SmallJob *job) {
-    if (smallJobs->empty()) {
+    if (!isDuringWeekend(simulator->now()) && smallJobs->empty() &&
+        !isDuringWeekend(simulator->now() + JobsSizes::smallMaximumTime)) {
         smallJobs->push_back(job);
         tryToExecuteNextSmallJob(simulator);
     } else {
@@ -83,7 +87,8 @@ void Scheduler::insertSmallJob(AbstractSimulator *simulator, SmallJob *job) {
 
 
 void Scheduler::insertLargeJob(class AbstractSimulator *simulator, class LargeJob *job) {
-    if (largeJobs->empty()) {
+    if (!isDuringWeekend(simulator->now()) && largeJobs->empty() &&
+        !isDuringWeekend(simulator->now() + JobsSizes::largeMaximumTime)) {
         largeJobs->push_back(job);
         tryToExecuteNextLargeJob(simulator);
     } else {
