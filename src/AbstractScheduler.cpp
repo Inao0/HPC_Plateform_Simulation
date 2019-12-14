@@ -18,7 +18,7 @@ Scheduler::Scheduler() {
     smallJobs = new std::list<SmallJob *>;
     largeJobs = new std::list<LargeJob *>;
     hugeJobs = new std::list<HugeJob *>;
-
+	gpuJobs = new std::list<GpuJob*>;
 
 }
 
@@ -35,6 +35,12 @@ void Scheduler::addFreeSmallNode(AbstractSimulator *simulator, ReservedForSmallJ
     if (smallJobs->front() != nullptr && isDuringWeekend(simulator->now() + smallJobs->front()->maxTime())) {
         tryToExecuteNextSmallJob(simulator);
     }
+}
+void Scheduler::addFreeGpuNode(AbstractSimulator* simulator, ReservedForGpuJobNode* node) {
+	this->freeGpuNodes.push(node);
+	if (gpuJobs->front() != nullptr && isDuringWeekend(simulator->now() + gpuJobs->front()->maxTime())) {
+		tryToExecuteNextGpuJob(simulator);
+	}
 }
 
 void Scheduler::addFreeNode(class AbstractSimulator *simulator, class Node *node) {
@@ -81,6 +87,18 @@ void Scheduler::insertSmallJob(AbstractSimulator *simulator, SmallJob *job) {
     }
 }
 
+void Scheduler::insertGpuJob(AbstractSimulator* simulator, GpuJob* job) {
+	if (gpuJobs->empty()) {
+		gpuJobs->push_back(job);
+		tryToExecuteNextGpuJob(simulator);
+	}
+	else {
+		gpuJobs->push_back(job);
+	}
+}
+
+
+
 
 void Scheduler::insertLargeJob(class AbstractSimulator *simulator, class LargeJob *job) {
     if (largeJobs->empty()) {
@@ -104,6 +122,9 @@ AbstractJob *Scheduler::nextJob() {
     if (!largeJobs->empty()) {
         nextJobs.push_back(largeJobs->front());
     }
+	if (!gpuJobs->empty()) {
+		nextJobs.push_back(gpuJobs->front());
+	}
     if (!smallJobs->empty()) {
         nextJobs.push_back(smallJobs->front());
     }

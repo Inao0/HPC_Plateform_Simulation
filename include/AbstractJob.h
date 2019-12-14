@@ -146,6 +146,32 @@ public:
     void generateRandomRequirements();
 };
 
+class GpuJob : public AbstractJob {
+private:
+	string type = "Gpu";
+public:
+
+	void insertIn(AbstractSimulator* simulator, Scheduler* scheduler);
+
+	int maxNodes() { return JobsSizes::gpuMaxNumberOfNode; };
+
+	double maxTime() { return JobsSizes::gpuMaximumTime; };
+
+	/*
+	 * Assume that the job that you are trying to execute is the first in his queue
+	 */
+	void tryToExecute(AbstractSimulator* simulator, Scheduler* scheduler);
+
+	string getType() { return type; };
+
+	void generateRandomRequirements();
+};
+
+
+
+
+
+
 typedef AbstractJob *(*CreateJobFn)();
 
 AbstractJob *CreateRandomJob();

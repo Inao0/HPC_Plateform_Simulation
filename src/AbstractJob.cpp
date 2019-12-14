@@ -24,6 +24,8 @@ CreateJobFn create[] =
                 &CreateJob<SmallJob>,
                 &CreateJob<MediumJob>,
                 &CreateJob<HugeJob>
+				&CreateJob<GpuJob>
+
         };
 
 
@@ -45,6 +47,10 @@ void SmallJob::insertIn(AbstractSimulator *simulator, Scheduler *scheduler) {
     scheduler->insertSmallJob(simulator, this);
 }
 
+void GpuJob::insertIn(AbstractSimulator* simulator, Scheduler* scheduler) {
+	scheduler->insertGpuJob(simulator, this);
+}
+
 void HugeJob::insertIn(AbstractSimulator *simulator, Scheduler *scheduler) {
     scheduler->insertHugeJob(simulator, this);
 }
@@ -55,6 +61,9 @@ void HugeJob::tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler) {
 
 void LargeJob::tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler) {
     scheduler->tryToExecuteNextLargeJob(simulator);
+}
+void GpuJob::tryToExecute(AbstractSimulator* simulator, Scheduler* scheduler) {
+	scheduler->tryToExecuteNextGpuJob(simulator);
 }
 
 
@@ -89,7 +98,10 @@ void SmallJob::generateRandomRequirements() {
     numberOfNodes = 1+Random::binomialInt(JobsSizes::smallMaxNumberOfNode-1, 0.5);
 }
 
-
+void GpuJob::generateRandomRequirements() {
+	generateRandomTime(0, JobsSizes::gpuMaximumTime);
+	numberOfNodes = 1 + Random::binomialInt(JobsSizes::gpuMaxNumberOfNode, 8);
+}
 void MediumJob::tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler) {
     scheduler->tryToExecuteNextMediumJob(simulator);
 }
@@ -99,5 +111,7 @@ void SmallJob::tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler) 
     scheduler->tryToExecuteNextSmallJob(simulator);
 }
 
-
+void GpuJob::tryToExecute(AbstractSimulator* simulator, Scheduler* scheduler) {
+	scheduler->tryToExecuteNextGpuJob(simulator);
+}
 

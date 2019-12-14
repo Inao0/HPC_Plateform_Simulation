@@ -3,6 +3,7 @@
 
 #include <queue>
 #include "../include/Node.h"
+#include "../include/GpuNode.h"
 #include "AbstractJob.h"
 #include <list>
 
@@ -17,14 +18,18 @@ class LargeJob;
 
 class HugeJob;
 
+class GpuJob;
+
 class Scheduler {
 private:
     std::list<MediumJob *> *mediumJobs{};//maybe should use a heap for ordering according to priority maybe heaps for different jobs and then take the one with the highest priority ?
 	std::list<SmallJob*>* smallJobs{};
 	std::list<LargeJob *> *largeJobs{}; //maybe should use a heap for ordering according to priority maybe heaps for different jobs and then take the one with the highest priority ?
     std::list<HugeJob *> *hugeJobs{}; //maybe should use a heap for ordering according to priority maybe heaps for different jobs and then take the one with the highest priority ?
-    std::queue<Node *> freeMediumNodes; //reserved for medium nodes
+	std::list<GpuJob*>* gpuJobs{};
+	std::queue<Node *> freeMediumNodes; //reserved for medium nodes
 	std::queue<Node*> freeSmallNodes;
+	std::queue<Node*> freeGpuNodes;
 	std::queue<Node *> freeNodes;
     std::queue<Node *> freeHugeNodes; //only for the weekend
     double const costOneHourOneNode = 1;
@@ -35,6 +40,7 @@ public:
     void tryToExecuteNextMediumJob(AbstractSimulator* simulator);
 	void tryToExecuteNextSmallJob(AbstractSimulator* simulator);
     void tryToExecuteNextHugeJobs(AbstractSimulator *simulator);
+	void tryToExecuteNextGpuJobs(AbstractSimulator* simulator);
     Scheduler();
     Scheduler(const Scheduler &scheduler) = delete;
     Scheduler &operator=(const Scheduler &scheduler) = delete;
@@ -43,6 +49,7 @@ public:
     void addFreeNode(AbstractSimulator *simulator, Node *node);
     void addFreeMediumNode(AbstractSimulator *simulator, ReservedForMediumJobNode* node);
 	void addFreeSmallNode(AbstractSimulator* simulator, ReservedForSmallJobNode* node);
+	void addFreeGpuNode(AbstractSimulator* simulator, ReservedForGpuJobNode* node);
     double costPerHourPerNode();
 
     AbstractJob* nextJob();
@@ -50,6 +57,7 @@ public:
     void insertMediumJob(AbstractSimulator *simulator, MediumJob *job);
 	void insertSmallJob(AbstractSimulator* simulator, SmallJob* job);
     void insertLargeJob(AbstractSimulator *simulator, LargeJob *job);
+	void insertGpuJob(AbstractSimulator* simulator, GpuJob *job);
     void insertHugeJob(AbstractSimulator *simulator, HugeJob *job) ;
 
     void tryToExecuteNextJobs(AbstractSimulator *pSimulator);
