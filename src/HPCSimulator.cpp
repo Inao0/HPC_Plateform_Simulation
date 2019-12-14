@@ -6,77 +6,172 @@
 #include "../include/weekendEvent.h"
 #include "../include/Group.h"
 #include <cmath>
+#include <fstream>
 
 void HPCSimulator::start() {
-    auto* scheduler = new Scheduler();
+    auto *scheduler = new Scheduler();
 
-	events = new ListQueue();
-    int numberOfWeeks = 4;
+    events = new ListQueue();
+//TODO change this crap
+    int numberOfWeeks = 8;
     auto *weekendBegin = new WeekendBegin(numberOfWeeks, scheduler);
     auto *weekendEnd = new WeekendEnd(numberOfWeeks, scheduler);
     insert(weekendBegin);
     insert(weekendEnd);
 
-	/* Create the generator, queue, and simulator */
-	/* Connect them together. */
-	std::vector<Node*> nodes;
-    for (int i = 0; i < JobsSizes::TotalNumberOfNodes ; ++i) {
+    /* Create the generator, queue, and simulator */
+    /* Connect them together. */
+    std::vector<Node *> nodes;
+    for (int i = 0; i < JobsSizes::TotalNumberOfNodes; ++i) {
         nodes.push_back(new Node());
     }
-
-	auto *curriculum1 = new Curriculum(50,20);
-    auto *curriculum2 = new Curriculum(4000,120);
-     auto *group1= new Group(4000);
-
-	auto* user1 = new Student(curriculum1);
-	auto* user2 = new Student(curriculum1);
-	auto* user3 = new Student(curriculum2);
-	auto* researcher1 =new Researcher(group1);
-	auto* researcher2 =new Researcher(group1);
-
-	researcher1->addIndividualGrant(1000);
-
-    cout<<" End User initialisation"<<std::endl;
-	user1->addScheduler(scheduler);
-	user2->addScheduler(scheduler);
-	user3->addScheduler(scheduler);
-	researcher1->addScheduler(scheduler);
-	researcher2->addScheduler(scheduler);
-    cout<<" End User initialisation"<<std::endl;
     for (auto &node : nodes) {
         scheduler->addFreeNode(this, node);
         node->addScheduler(scheduler);
     }
-	/* Start the generator by creating one customer immediately */
+    for (User *user : users) {
+        user->addScheduler(scheduler);
+        insert(user);
+    }
+    cout<<users.size()<< " users inserted in the timeline \n";
+    doAllEvents();
 
-	insert(user1);
-	insert(user2);
-	insert(user3);
-	insert(researcher1);
-	insert(researcher2);
-    cout<<"users inserted"<<std::endl;
-	// execute the events
-
-	doAllEvents();
-
-	// free the memory, note that events is freed in the base class destructor
-    for (int i = 0; i < nodes.size() ; ++i) {
-        Node* node = nodes.back();
+    // free the memory, note that events is freed in the base class destructor
+    for (int i = 0; i < nodes.size(); ++i) {
+        Node *node = nodes.back();
         nodes.pop_back();
         delete node;
     }
-    delete curriculum1;
-	delete curriculum2;
-	delete scheduler;
-	delete user1;
-	delete user2;
-	delete user3;
-	delete researcher1;
-	delete researcher2;
-	delete weekendBegin;
-	delete weekendEnd;
+    for (int i = 0; i < users.size(); ++i) {
+        User *user = users.back();
+        users.pop_back();
+        delete user;
+    }
+    delete weekendBegin;
+    delete weekendEnd;
+
+}
+
+void HPCSimulator::initialisation(string filename) {
+    cout << "Initialising simulation from file \n";
+    std::ifstream inputStream(filename);
+    std::string line = "";
+    getline(inputStream, line);
+    //research group parsing
+    while (line != "----") {
+        unsigned long firstMeaningfullcharacter = line.find_first_not_of(" \t");
+        if (firstMeaningfullcharacter == string::npos || line[firstMeaningfullcharacter] == '#') {
+            getline(inputStream, line);
+            continue;
+        } else {
+            double commonBudget;
+            double averageTimeBetweenJobs;
+            bool permissions[5];
+            int numberOfResearchers;
+            std::vector<double> individualGrants;
+
+            //budget line:
+            commonBudget = std::stod(line.substr(line.find(' ') + 1, line.size() - 1));
+            auto *group = new Group(commonBudget);
+
+            // permission line :
+            getline(inputStream, line);
+            int indexFirstSpace = line.find(' ');
+            for (int i = 0; i < 5; ++i) {
+                permissions[i] = ('1' == line[indexFirstSpace + 1 + 2 * i]);
+            }
+
+            //Average Time Between Two Jobs line
+            getline(inputStream, line);
+            averageTimeBetweenJobs = std::stod(line.substr(line.find(' ') + 1, line.size() - 1));
+
+            //Get Individual Grant
+            getline(inputStream, line);
+            int indexNextSpaceIndex = line.find(' ');
+            if (indexNextSpaceIndex != line.npos) {
+                std::string grantsString = (line.substr(line.find(' ') + 1, line.size() - 1));
+                if (grantsString.find_first_not_of(" \t") != grantsString.npos) {
+                    while (!grantsString.empty()) {
+                        individualGrants.push_back(std::stod(grantsString.substr(0, grantsString.find(' '))));
+                        if (grantsString.find(' ') == grantsString.npos) {
+                            grantsString = "";
+                        } else {
+                            grantsString = grantsString.substr(grantsString.find(' ') + 1, grantsString.npos - 1);
+                        }
+
+                    }
+                }
+            }
+
+            // Number of researchers line
+            getline(inputStream, line);
+            numberOfResearchers = std::stoi(line.substr(line.find(' ') + 1, line.size() - 1));
+
+            for (int j = 0; j < numberOfResearchers; ++j) {
+                auto *researcher = new Researcher(group, averageTimeBetweenJobs);
+                if (j < individualGrants.size()) {
+                    researcher->addIndividualGrant(individualGrants[j]);
+                }
+                users.push_back(researcher);
+            }
+
+            cout << " Group : " << commonBudget << ',' << permissions[0] << permissions[1] << permissions[2]
+                 << permissions[3] << permissions[4] << ',' << averageTimeBetweenJobs << "," << numberOfResearchers
+                 << "\n";
+            getline(inputStream, line);
+        }
+    }
+    getline(inputStream, line);
+    //Curriculums parsing
+    while (line != "----") {
+        unsigned long firstMeaningfullcharacter = line.find_first_not_of(" \t");
+        if (firstMeaningfullcharacter == string::npos || line[firstMeaningfullcharacter] == '#') {
+            getline(inputStream, line);
+            continue;
+        } else {
+            double cummulativeCap;
+            int instantanousCap;
+            double averageTimeBetweenJobs;
+            bool permissions[5];
+            int numberOfStudents;
+            std::vector<double> individualGrants;
+
+            //cumulative cap line
+            cummulativeCap = std::stod(line.substr(line.find(' ') + 1, line.size() - 1));
+
+            // instantaneous cap line
+            getline(inputStream, line);
+            instantanousCap = std::stoi(line.substr(line.find(' ') + 1, line.size() - 1));
+
+            auto *curriculum = new Curriculum(cummulativeCap, instantanousCap);
+
+            // permission line :
+            getline(inputStream, line);
+            int indexFirstSpace = line.find(' ');
+            for (int i = 0; i < 5; ++i) {
+                permissions[i] = ('1' == line[indexFirstSpace + 1 + 2 * i]);
+            }
+
+            //Average Time Between Two Jobs line
+            getline(inputStream, line);
+            averageTimeBetweenJobs = std::stod(line.substr(line.find(' ') + 1, line.size() - 1));
+
+            // Number of students line
+            getline(inputStream, line);
+            numberOfStudents = std::stoi(line.substr(line.find(' ') + 1, line.size() - 1));
 
 
+            for (int j = 0; j < numberOfStudents; ++j) {
+                users.push_back(new Student(curriculum, averageTimeBetweenJobs));
+            }
+
+            cout << " Curriculum : " << cummulativeCap << "," << instantanousCap << ',' << permissions[0]
+                 << permissions[1] << permissions[2]
+                 << permissions[3] << permissions[4] << ',' << averageTimeBetweenJobs << "," << numberOfStudents
+                 << "\n";
+            getline(inputStream, line);
+        }
+    }
 }
 
 

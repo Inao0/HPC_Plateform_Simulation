@@ -12,7 +12,7 @@ public:
     void removeFromGroupRessources(
             double nodeHoursToRemove) { groupRessourcesAllocationInNodeHours -= nodeHoursToRemove; }
 
-    Group(double cumulativeCap) : groupRessourcesAllocationInNodeHours(cumulativeCap) {};
+    Group(double commonBudget) : groupRessourcesAllocationInNodeHours(commonBudget) {};
 
     Group() = delete;
 };
