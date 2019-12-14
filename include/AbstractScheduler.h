@@ -3,7 +3,6 @@
 
 #include <queue>
 #include "../include/Node.h"
-#include "../include/GpuNode.h"
 #include "AbstractJob.h"
 #include <list>
 
@@ -31,7 +30,6 @@ private:
 	std::queue<Node*> freeSmallNodes;
 	std::queue<Node*> freeGpuNodes;
 	std::queue<Node *> freeNodes;
-    std::queue<Node *> freeHugeNodes; //only for the weekend
     double const costOneHourOneNode = 1;
 
 public:
@@ -40,7 +38,8 @@ public:
     void tryToExecuteNextMediumJob(AbstractSimulator* simulator);
 	void tryToExecuteNextSmallJob(AbstractSimulator* simulator);
     void tryToExecuteNextHugeJobs(AbstractSimulator *simulator);
-	void tryToExecuteNextGpuJobs(AbstractSimulator* simulator);
+	void tryToExecuteNextGpuJob(AbstractSimulator* simulator);
+
     Scheduler();
     Scheduler(const Scheduler &scheduler) = delete;
     Scheduler &operator=(const Scheduler &scheduler) = delete;
@@ -49,7 +48,7 @@ public:
     void addFreeNode(AbstractSimulator *simulator, Node *node);
     void addFreeMediumNode(AbstractSimulator *simulator, ReservedForMediumJobNode* node);
 	void addFreeSmallNode(AbstractSimulator* simulator, ReservedForSmallJobNode* node);
-	void addFreeGpuNode(AbstractSimulator* simulator, ReservedForGpuJobNode* node);
+	void addFreeGpuNode(AbstractSimulator* simulator, GpuNode* node);
     double costPerHourPerNode();
 
     AbstractJob* nextJob();
