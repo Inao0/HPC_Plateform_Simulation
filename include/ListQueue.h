@@ -4,7 +4,6 @@
 #include <vector>
 #include "Simulator.h"
 
-
 class ListQueue : public OrderedSet {
 private:
 	std::vector<Comparable*>* elements;

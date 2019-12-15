@@ -2,7 +2,7 @@
 
 #include "AbstractSimulator.h"
 
-string convertTime(double time);
+std::string convertTime(double time);
 
 class Event : public AbstractEvent {
 protected:

@@ -30,9 +30,9 @@ void User::execute(AbstractSimulator *simulator) {
         //TODO assumption + GPU NODES
         double jobCost;
         if (job->isGpuJob()) {
-            jobCost = job->getExecutionTime() * JobsSizes::costOneHourOneGPUNode * job->getNumberOfNodes();
+            jobCost = job->getExecutionDuration() * JobsSizes::costOneHourOneGPUNode * job->getNumberOfNodes();
         } else {
-            jobCost = job->getExecutionTime() * JobsSizes::costOneHourOneNode * job->getNumberOfNodes();
+            jobCost = job->getExecutionDuration() * JobsSizes::costOneHourOneNode * job->getNumberOfNodes();
         }
 
         if (budgetLeft() - jobCost >= 0) {
@@ -54,7 +54,7 @@ void User::execute(AbstractSimulator *simulator) {
                       << " Budget left " << convertTime(budgetLeft()) << "\n";
         } else {
             std::cout << "User " << userId << " has not enough budget left for is next job. Budget left : "
-                      << budgetLeft() << " / Next Job : " << convertTime(job->getExecutionTime()) << " on "
+                      << budgetLeft() << " / Next Job : " << convertTime(job->getExecutionDuration()) << " on "
                       << job->getNumberOfNodes()
                       << " Nodes \n";
         }

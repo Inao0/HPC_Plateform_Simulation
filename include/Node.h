@@ -1,15 +1,16 @@
 #pragma once
 
 #include "Simulator.h"
-#include "ListQueue.h"
 #include "random.h"
+#include "HPCSimulator.h"
 #include <list>
 #include <cmath>
 
-
-class Scheduler;
+class ListQueue;
+class AbstractScheduler;
 class User;
 class AbstractJob;
+class HPCSimulator;
 /**
 * A server that holds a customer for an exponentially distributed amout of time
 * and releases it.
@@ -18,7 +19,7 @@ class Node : public Event {
 protected:
 	AbstractJob* jobBeingExecuted;
     /*JobQueue* queue;*/
-    Scheduler* scheduler;
+    AbstractScheduler* scheduler;
 	double serviceTime;
 	double waitingTime;
 	double waitingTimeQueue;
@@ -30,8 +31,8 @@ public:
 	Node(const Node& node) = delete;
 	Node& operator=(const Node& node) = delete;
 
-	Node& addScheduler(Scheduler* scheduler);
-	void execute(AbstractSimulator* simulator);
+	Node& addScheduler(AbstractScheduler* scheduler);
+	void execute(AbstractSimulator *simulator);
 	bool isAvailable();
 
     /**

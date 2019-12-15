@@ -16,7 +16,7 @@ bool isDuringWeekend(double time) {
 }
 
 
-Scheduler::Scheduler() {
+AbstractScheduler::AbstractScheduler() {
     mediumJobs = new std::list<MediumJob *>;
     smallJobs = new std::list<SmallJob *>;
     largeJobs = new std::list<LargeJob *>;
@@ -25,6 +25,14 @@ Scheduler::Scheduler() {
 
 }
 
+AbstractScheduler::~AbstractScheduler() {
+    delete mediumJobs;
+    delete largeJobs;
+    delete hugeJobs;
+    delete smallJobs;
+    delete gpuJobs;
+
+}
 
 void Scheduler::addFreeMediumNode(AbstractSimulator *simulator, ReservedForMediumJobNode *node) {
     this->freeMediumNodes.push(node);
@@ -325,12 +333,6 @@ void Scheduler::tryToExecuteNextSmallJob(AbstractSimulator *simulator) {
 
 }
 
-Scheduler::~Scheduler() {
-    delete mediumJobs;
-    delete largeJobs;
-    delete hugeJobs;
-    delete smallJobs;
-}
 
 /* Try to launch as many huge jobs as possible */
 void Scheduler::tryToExecuteNextHugeJobs(AbstractSimulator *simulator) {
@@ -386,6 +388,11 @@ void Scheduler::tryToExecuteNextJobs(AbstractSimulator *simulator) {
 int Scheduler::totalOfNonHugeJobsWaiting() {
     return smallJobs->size() + mediumJobs->size() + largeJobs->size() + gpuJobs->size();
 }
+
+Scheduler::Scheduler() {
+
+}
+
 
 
 

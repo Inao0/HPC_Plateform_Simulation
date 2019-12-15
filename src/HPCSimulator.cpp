@@ -5,11 +5,12 @@
 #include "../include/Researcher.h"
 #include "../include/weekendEvent.h"
 #include "../include/Group.h"
+#include "../include/ListQueue.h"
 #include <cmath>
 #include <fstream>
 
 void HPCSimulator::start() {
-    auto *scheduler = new Scheduler();
+    AbstractScheduler *scheduler = new Scheduler();
     events = new ListQueue();
 
     auto *weekendBegin = new WeekendBegin(scheduler);
@@ -89,6 +90,7 @@ void HPCSimulator::initialisation(string filename) {
             //budget line:
             commonBudget = std::stod(line.substr(line.find(' ') + 1, line.size() - 1));
             auto *group = new Group(commonBudget);
+            initialUsersBudget += commonBudget;
 
             // permission line :
             getline(inputStream, line);
@@ -126,11 +128,14 @@ void HPCSimulator::initialisation(string filename) {
             for (int j = 0; j < numberOfResearchers; ++j) {
                 auto *researcher = new Researcher(group, averageTimeBetweenJobs);
                 if (j < individualGrants.size()) {
+                    initialUsersBudget += individualGrants[j];
                     researcher->addIndividualGrant(individualGrants[j]);
                 }
-                researcher->setPermission(permissions[0],permissions[1],permissions[2],permissions[3],permissions[4]);
+                researcher->setPermission(permissions[0], permissions[1], permissions[2], permissions[3],
+                                          permissions[4]);
                 users.push_back(researcher);
             }
+
 
             cout << " Group : " << commonBudget << ',' << permissions[0] << permissions[1] << permissions[2]
                  << permissions[3] << permissions[4] << ',' << averageTimeBetweenJobs << "," << numberOfResearchers
@@ -176,11 +181,11 @@ void HPCSimulator::initialisation(string filename) {
             // Number of students line
             getline(inputStream, line);
             numberOfStudents = std::stoi(line.substr(line.find(' ') + 1, line.size() - 1));
-
+            initialUsersBudget += numberOfStudents * cummulativeCap;
 
             for (int j = 0; j < numberOfStudents; ++j) {
                 Student *student = new Student(curriculum, averageTimeBetweenJobs);
-                student->setPermission(permissions[0],permissions[1],permissions[2],permissions[3],permissions[4]);
+                student->setPermission(permissions[0], permissions[1], permissions[2], permissions[3], permissions[4]);
                 users.push_back(student);
             }
 
@@ -191,6 +196,124 @@ void HPCSimulator::initialisation(string filename) {
             getline(inputStream, line);
         }
     }
+}
+
+void HPCSimulator::registerFinishedGpuJobs(GpuJob *pJob) {
+    finishedGpuJobs.push_back(pJob);
+}
+
+void HPCSimulator::registerFinishedSmallJobs(SmallJob *pJob) {
+    finishedSmallJobs.push_back(pJob);
+}
+
+void HPCSimulator::registerFinishedMediumJobs(MediumJob *pJob) {
+    finishedMediumJobs.push_back(pJob);
+}
+
+void HPCSimulator::registerFinishedLargeJobs(LargeJob *pJob) {
+    finishedLargeJobs.push_back(pJob);
+}
+
+void HPCSimulator::registerFinishedHugeJobs(HugeJob *pJob) {
+    finishedHugeJobs.push_back(pJob);
+}
+
+void HPCSimulator::printResults() {
+    int numberOfHoursInAWeek = 168;
+    double numberOfWeeks = floor(time / numberOfHoursInAWeek);
+    double nodeHoursUsed = 0, nodeHoursUsedBySmall = 0, nodeHoursUsedByMedium = 0, nodeHoursUsedByLarge = 0, nodeHoursUsedByHuge = 0, nodeHoursUsedByGpu = 0;
+    double averageWaitingTimeSmall = 0, averageWaitingTimeMedium = 0, averageWaitingTimeLarge = 0, averageWaitingTimeHuge = 0, averageWaitingTimeGpu = 0;
+    std::vector<double> turnaroudTimeRatio;
+    double averageTurnaroundTimeRatio = 0;
+    double opertationCost = JobsSizes::overallOperationCostPerHour * (numberOfWeeks * numberOfHoursInAWeek);
+
+    cout << "\nThe simulation ran for : " << numberOfWeeks << " weeks \n";
+    cout << "==============THROUGHPUT==============\n";
+    cout << "In average, " << finishedSmallJobs.size() / numberOfWeeks << " small jobs ran per weeks \n";
+    cout << "In average, " << finishedMediumJobs.size() / numberOfWeeks << " medium jobs ran per weeks \n";
+    cout << "In average, " << finishedLargeJobs.size() / numberOfWeeks << " large jobs ran per weeks \n";
+    cout << "In average, " << finishedHugeJobs.size() / numberOfWeeks << " huge jobs ran per weeks \n";
+    cout << "In average, " << finishedGpuJobs.size() / numberOfWeeks << " gpu jobs ran per weeks \n";
+
+    for (auto &job: finishedSmallJobs) {
+        nodeHoursUsedBySmall += job->getExecutionDuration();
+        averageWaitingTimeSmall += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
+        turnaroudTimeRatio.push_back(
+                (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
+    }
+    averageWaitingTimeSmall = averageWaitingTimeSmall / finishedSmallJobs.size();
+    for (auto &job: finishedMediumJobs) {
+        nodeHoursUsedByMedium += job->getExecutionDuration();
+        averageWaitingTimeMedium += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
+        turnaroudTimeRatio.push_back(
+                (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
+    }
+    averageWaitingTimeMedium = averageWaitingTimeMedium / finishedMediumJobs.size();
+    for (auto &job: finishedLargeJobs) {
+        nodeHoursUsedByLarge += job->getExecutionDuration();
+        averageWaitingTimeLarge += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
+        turnaroudTimeRatio.push_back(
+                (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
+    }
+    averageWaitingTimeLarge = averageWaitingTimeLarge / finishedLargeJobs.size();
+    for (auto &job: finishedHugeJobs) {
+        nodeHoursUsedByHuge += job->getExecutionDuration();
+        averageWaitingTimeHuge += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
+        turnaroudTimeRatio.push_back(
+                (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
+    }
+    averageWaitingTimeHuge = averageWaitingTimeHuge / finishedHugeJobs.size();
+    for (auto &job: finishedGpuJobs) {
+        nodeHoursUsedByGpu += job->getExecutionDuration();
+        averageWaitingTimeGpu += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
+        turnaroudTimeRatio.push_back(
+                (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
+    }
+    averageWaitingTimeGpu = averageWaitingTimeGpu / finishedGpuJobs.size();
+
+    nodeHoursUsed = nodeHoursUsedByGpu + nodeHoursUsedByHuge + nodeHoursUsedByLarge + nodeHoursUsedByMedium +
+                    nodeHoursUsedBySmall;
+
+    for (auto &ratio : turnaroudTimeRatio) {
+        averageTurnaroundTimeRatio += ratio;
+    }
+    averageTurnaroundTimeRatio = averageTurnaroundTimeRatio / turnaroudTimeRatio.size();
+
+    cout << "\n============NODE-HOURS USED============\n";
+    cout << nodeHoursUsed << " node-hours have been used on " << initialUsersBudget << " available\n"
+         << nodeHoursUsedBySmall << " for small jobs \n"
+         << nodeHoursUsedByMedium << " for medium jobs \n"
+         << nodeHoursUsedByLarge << " for large jobs \n"
+         << nodeHoursUsedByHuge << " for huge jobs \n"
+         << nodeHoursUsedByGpu << " for Gpu jobs \n"
+         << " The utilization ratio is " << nodeHoursUsed / (numberOfHoursInAWeek * numberOfWeeks) << "\n"
+         << "'(number of node-hours used / number of node-hours available on the HPC)";
+
+
+    cout << "\n================ COSTS ================\n";
+    double totalUserCost = nodeHoursUsed * JobsSizes::costOneHourOneNode + (nodeHoursUsedByGpu *
+                                                                            (JobsSizes::costOneHourOneGPUNode -
+                                                                             JobsSizes::costOneHourOneNode));
+    cout << "Resulting price paid by users :" << totalUserCost << "\n"
+         << nodeHoursUsedBySmall * JobsSizes::costOneHourOneNode << " for small jobs \n"
+         << nodeHoursUsedByMedium * JobsSizes::costOneHourOneNode << " for medium jobs \n"
+         << nodeHoursUsedByLarge * JobsSizes::costOneHourOneNode << " for large jobs \n"
+         << nodeHoursUsedByHuge * JobsSizes::costOneHourOneNode << " for huge jobs \n"
+         << nodeHoursUsedByGpu * JobsSizes::costOneHourOneGPUNode << " for Gpu jobs \n";
+
+
+    cout << "\n============ WAITING TIME ============\n"
+         << "Average waiting time in queue : \n"
+         << averageWaitingTimeSmall << " for small jobs \n"
+         << averageWaitingTimeMedium << " for medium jobs \n"
+         << averageWaitingTimeLarge << " for large jobs \n"
+         << averageWaitingTimeHuge << " for huge jobs \n"
+         << averageWaitingTimeGpu << " for Gpu jobs \n";
+    cout << "Average turnaround time ratio : " << averageTurnaroundTimeRatio << "\n";
+
+
+    cout << "\n=========== ECONOMIC BALANCE ==========\n";
+    cout << "Economic balance of the center : " << totalUserCost - opertationCost << "\n";
 }
 
 

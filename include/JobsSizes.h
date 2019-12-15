@@ -34,7 +34,8 @@ public:
 
     constexpr double const static costOneHourOneNode = 1;
     constexpr double const static costOneHourOneGPUNode = 1.1;
-
+    constexpr double const static operationCostOneHourOneNode = 0.1;
+    constexpr double const static overallOperationCostPerHour = operationCostOneHourOneNode*TotalNumberOfNodes;
 };
 
 #endif //SUPERCOMPUTERSIMULATION_JOBSSIZES_H

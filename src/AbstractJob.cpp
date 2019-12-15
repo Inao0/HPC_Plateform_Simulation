@@ -45,23 +45,23 @@ AbstractJob *CreateRandomJob(const bool permissions[5]) {
     return create[ distribution (randomGenerator)](); //forward the call
 }
 
-void LargeJob::insertIn(AbstractSimulator *simulator, Scheduler *scheduler) {
+void LargeJob::insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler) {
     scheduler->insertLargeJob(simulator, this);
 }
 
-void MediumJob::insertIn(AbstractSimulator *simulator, Scheduler *scheduler) {
+void MediumJob::insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler) {
     scheduler->insertMediumJob(simulator, this);
 }
 
-void SmallJob::insertIn(AbstractSimulator *simulator, Scheduler *scheduler) {
+void SmallJob::insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler) {
     scheduler->insertSmallJob(simulator, this);
 }
 
-void GpuJob::insertIn(AbstractSimulator* simulator, Scheduler* scheduler) {
+void GpuJob::insertIn(AbstractSimulator* simulator, AbstractScheduler* scheduler) {
 	scheduler->insertGpuJob(simulator, this);
 }
 
-void HugeJob::insertIn(AbstractSimulator *simulator, Scheduler *scheduler) {
+void HugeJob::insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler) {
     scheduler->insertHugeJob(simulator, this);
 }
 
@@ -70,8 +70,8 @@ void AbstractJob::generateRandomTime(double minTime, double maxTime) {
     double timeMean = 0.5 * (minTime + maxTime);
     double timeStddev = (maxTime - minTime) / 6;
     do {
-        executionTime = Random::normalDouble(timeMean, timeStddev);
-    } while (minTime > executionTime || maxTime < executionTime);
+        executionDuration = Random::normalDouble(timeMean, timeStddev);
+    } while (minTime > executionDuration || maxTime < executionDuration);
 }
 
 //TODO : ASSUMPTION on minimum limits
@@ -102,25 +102,41 @@ void GpuJob::generateRandomRequirements() {
 	numberOfNodes = 1 + Random::binomialInt(JobsSizes::gpuMaxNumberOfNode-1, 0.5);
 }
 
-void HugeJob::tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler) {
+void HugeJob::tryToExecute(AbstractSimulator *simulator, AbstractScheduler *scheduler) {
     //TODO justify this properly . Should never be called. Huge
 }
 
-void LargeJob::tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler) {
+void LargeJob::tryToExecute(AbstractSimulator *simulator, AbstractScheduler *scheduler) {
     scheduler->tryToExecuteNextLargeJob(simulator);
 }
 
-void GpuJob::tryToExecute(AbstractSimulator* simulator, Scheduler* scheduler) {
+void GpuJob::tryToExecute(AbstractSimulator* simulator, AbstractScheduler* scheduler) {
     scheduler->tryToExecuteNextGpuJob(simulator);
 }
 
-void MediumJob::tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler) {
+void MediumJob::tryToExecute(AbstractSimulator *simulator, AbstractScheduler *scheduler) {
     scheduler->tryToExecuteNextMediumJob(simulator);
 }
 
-
-void SmallJob::tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler) {
+void SmallJob::tryToExecute(AbstractSimulator *simulator, AbstractScheduler *scheduler) {
     scheduler->tryToExecuteNextSmallJob(simulator);
+}
+
+
+void GpuJob::registerAsFinishedJob(HPCSimulator *simulator){
+    simulator->registerFinishedGpuJobs(this);
+}
+void SmallJob::registerAsFinishedJob(HPCSimulator *simulator){
+    simulator->registerFinishedSmallJobs(this);
+}
+void MediumJob::registerAsFinishedJob(HPCSimulator *simulator){
+    simulator->registerFinishedMediumJobs(this);
+}
+void LargeJob::registerAsFinishedJob(HPCSimulator *simulator){
+    simulator->registerFinishedLargeJobs(this);
+}
+void HugeJob::registerAsFinishedJob(HPCSimulator *simulator) {
+    simulator->registerFinishedHugeJobs(this);
 }
 
 

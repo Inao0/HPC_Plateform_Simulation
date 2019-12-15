@@ -11,22 +11,22 @@
 
 class WeekendBegin : public Event {
 private:
-    Scheduler *scheduler;
+    AbstractScheduler *scheduler;
     const double numberOfHoursInAWeek = 168;
     const double numberOfHoursBeforeWeekEnd = 104;
 public:
     void execute(AbstractSimulator *simulator) override;
-    WeekendBegin(Scheduler *scheduler);
+    WeekendBegin(AbstractScheduler *scheduler);
 };
 
 class WeekendEnd : public Event {
 private:
-    Scheduler *scheduler;
+    AbstractScheduler *scheduler;
     const double numberOfHoursInAWeek = 168;
     const double numberOfHoursBeforeWeekEnd = 168;
 public:
     void execute(AbstractSimulator *simulator) override;
-    WeekendEnd(Scheduler *scheduler);
+    WeekendEnd(AbstractScheduler *scheduler);
 };
 
 

@@ -6,12 +6,13 @@
 #include <limits>
 #include "AbstractScheduler.h"
 #include "JobsSizes.h"
+#include "HPCSimulator.h"
 
 /*class JobQueue;*/
 
 class User;
-
-class JobsSizes;
+class HPCSimulator;
+class AbstractScheduler;
 
 // the Customer class (in this example patients)
 class AbstractJob {
@@ -19,8 +20,8 @@ protected:
 
     int id;   // job id
     double submittingTime = 0; // job scheduling time
-    double waitingTime = 0;    // job waiting time
-    double executionTime = 0;  // job execution time
+    double completionTime = 0;    // job waiting time
+    double executionDuration = 0;  // job execution time
     int numberOfNodes = 0;
     User *user = nullptr;
     static int jobCounter;
@@ -37,9 +38,9 @@ public:
 
     double getSubmittingTime() const { return submittingTime; }
 
-    double getWaitingTime() const { return waitingTime; }
+    double getCompletionTime() const { return completionTime; }
 
-    double getExecutionTime() const { return executionTime; }
+    double getExecutionDuration() const { return executionDuration; }
 
     int getNumberOfNodes() { return (numberOfNodes); };
 
@@ -48,13 +49,13 @@ public:
         return *this;
     }
 
-    AbstractJob &setWaitingTime(double time) {
-        waitingTime = time;
+    AbstractJob &setCompletionTime(double time) {
+        completionTime = time;
         return *this;
     }
 
     AbstractJob &setExecutionTime(double time) {
-        executionTime = time;
+        executionDuration = time;
         return *this;
     }
 
@@ -71,7 +72,7 @@ public:
         AbstractJob::user = user;
     }
 
-    virtual void insertIn(AbstractSimulator *simulator, Scheduler *scheduler) = 0;
+    virtual void insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler) = 0;
 
     virtual int maxNodes() = 0;
 
@@ -79,7 +80,7 @@ public:
 
     virtual string getType() = 0;
 
-    virtual void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler) = 0;
+    virtual void tryToExecute(AbstractSimulator *simulator, AbstractScheduler *scheduler) = 0;
 
     friend bool operator<(const AbstractJob &l, const AbstractJob &r) {
         return l.priority()
@@ -91,23 +92,27 @@ public:
     virtual void generateRandomRequirements() = 0;
 
     virtual bool isGpuJob() { return false; };
+
+    virtual void registerAsFinishedJob(HPCSimulator *pSimulator) = 0;
 };
 
 class LargeJob : public AbstractJob {
 private:
     string type = "Large";
 public:
-    void insertIn(AbstractSimulator *simulator, Scheduler *scheduler);
+    void insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
     int maxNodes() { return JobsSizes::largeMaxNumberOfNode; };
 
     double maxTime() { return JobsSizes::largeMaximumTime; };
 
-    void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler);
+    void tryToExecute(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
     string getType() { return type; };
 
     void generateRandomRequirements();
+
+    void registerAsFinishedJob(HPCSimulator *pSimulator);
 };
 
 
@@ -116,7 +121,7 @@ private:
     string type = "Medium";
 public:
 
-    void insertIn(AbstractSimulator *simulator, Scheduler *scheduler);
+    void insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
     int maxNodes() { return JobsSizes::mediumMaxNumberOfNode; };
 
@@ -127,9 +132,11 @@ public:
     /*
      * Assume that the job that you are trying to execute is the first in his queue
      */
-    void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler);
+    void tryToExecute(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
     void generateRandomRequirements();
+
+    void registerAsFinishedJob(HPCSimulator *pSimulator);
 };
 
 class SmallJob : public AbstractJob {
@@ -137,7 +144,7 @@ private:
     string type = "Small";
 public:
 
-    void insertIn(AbstractSimulator *simulator, Scheduler *scheduler);
+    void insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
     int maxNodes() { return JobsSizes::smallMaxNumberOfNode; };
 
@@ -146,11 +153,14 @@ public:
     /*
      * Assume that the job that you are trying to execute is the first in his queue
      */
-    void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler);
+    void tryToExecute(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
     string getType() { return type; };
 
     void generateRandomRequirements();
+
+    void registerAsFinishedJob(HPCSimulator *pSimulator);
+
 };
 
 
@@ -158,7 +168,7 @@ class HugeJob : public AbstractJob {
 private:
     string type = "Huge";
 public:
-    void insertIn(AbstractSimulator *simulator, Scheduler *scheduler);
+    void insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
     int maxNodes() { return JobsSizes::hugeMaxNumberOfNode; };
 
@@ -166,9 +176,11 @@ public:
 
     string getType() { return type; };
 
-    void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler);
+    void tryToExecute(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
     void generateRandomRequirements();
+
+    void registerAsFinishedJob(HPCSimulator *pSimulator);
 };
 
 class GpuJob : public AbstractJob {
@@ -176,7 +188,7 @@ private:
     string type = "Gpu";
 public:
 
-    void insertIn(AbstractSimulator *simulator, Scheduler *scheduler);
+    void insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
     int maxNodes() { return JobsSizes::gpuMaxNumberOfNode; };
 
@@ -185,13 +197,15 @@ public:
     /*
      * Assume that the job that you are trying to execute is the first in his queue
      */
-    void tryToExecute(AbstractSimulator *simulator, Scheduler *scheduler);
+    void tryToExecute(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
     string getType() { return type; };
 
     void generateRandomRequirements();
 
     bool isGpuJob() override { return true; };
+
+    void registerAsFinishedJob(HPCSimulator *pSimulator);
 };
 
 

@@ -3,6 +3,7 @@
 #include "../include/AbstractScheduler.h"
 #include "../include/User.h"
 #include "../include/AbstractJob.h"
+#include "../include/ListQueue.h"
 
 
 // convert the time in seconds to hrs, mins, secs
@@ -31,7 +32,7 @@ Node::Node() : Event() {
     queueSize = 0;
 }
 
-Node &Node::addScheduler(class Scheduler *scheduler) {
+Node &Node::addScheduler(AbstractScheduler *scheduler) {
     this->scheduler = scheduler;
     return *this;
 }
@@ -49,12 +50,14 @@ void Node::getStats() const {
 * The customer's service is completed so print a message.
 * If the queue is not empty, get the next customer.
 */
-void Node::execute(AbstractSimulator *simulator) {
-    Event::execute(simulator);
+void Node::execute(AbstractSimulator *HPCsimulator) {
+    Event::execute(HPCsimulator);
     printMessage();
     (jobBeingExecuted->getUser())->reduceNumberOfCurrentlyUsedNodeBy(1);
+    jobBeingExecuted->setCompletionTime(HPCsimulator->now());
+    jobBeingExecuted->registerAsFinishedJob(dynamic_cast<HPCSimulator *>(HPCsimulator));
     jobBeingExecuted = nullptr;
-    addFreeNodeToScheduler(simulator);
+    addFreeNodeToScheduler(HPCsimulator);
 }
 
 void Node::addFreeNodeToScheduler(AbstractSimulator * simulator) {
@@ -89,22 +92,22 @@ void Node::insert(AbstractSimulator *simulator, AbstractJob *job) {
     }
     jobBeingExecuted = job;
     // service time is set at average 15 patients per hour
-    time = simulator->now() + job->getExecutionTime() ;//Random::exponential(15)
+    time = simulator->now() + job->getExecutionDuration() ;//Random::exponential(15)
     simulator->insert(this);
     num++;
 }
 
 void Node::printMessage() {
     std::cout << "Finished executing " << jobBeingExecuted->getId() << " (" <<jobBeingExecuted->getType()<<") at time " << convertTime(time) << "\n";
-    std::cout << "Execution time was " << convertTime(jobBeingExecuted->getExecutionTime()) << "\n";
+    std::cout << "Execution duration was " << convertTime(jobBeingExecuted->getExecutionDuration()) << "\n";
     std::cout << "Job waiting time " << convertTime(time - jobBeingExecuted->getSubmittingTime()) << "\n";
     std::cout << "Job waiting time in queue "
-              << convertTime(time - jobBeingExecuted->getExecutionTime() - jobBeingExecuted->getSubmittingTime())
+              << convertTime(time - jobBeingExecuted->getExecutionDuration() - jobBeingExecuted->getSubmittingTime())
               << "\n";
 
     // update the various times and queue size so we can calcualte averages at the end
-    serviceTime += jobBeingExecuted->getExecutionTime();
+    serviceTime += jobBeingExecuted->getExecutionDuration();
     waitingTime += time - jobBeingExecuted->getSubmittingTime();
-    waitingTimeQueue += time - jobBeingExecuted->getExecutionTime() - jobBeingExecuted->getSubmittingTime();
+    waitingTimeQueue += time - jobBeingExecuted->getExecutionDuration() - jobBeingExecuted->getSubmittingTime();
     //queueSize += queue->size();
 }

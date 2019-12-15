@@ -3,16 +3,18 @@
 
 #include <unordered_set>
 #include "AbstractScheduler.h"
-
+#include "JobsSizes.h"
 /**
 * Generate a stream of jobs for 8.0 time units.
 */
+class AbstractScheduler;
+
 class User : public Event {
 protected:
     double budget = 0;
     int instantaneousMaxNumberOfNodes = JobsSizes::TotalNumberOfNodes;
     int currentlyUsedNumberOfNodes = 0;
-    Scheduler *scheduler;
+    AbstractScheduler *scheduler;
     static int numOfUsers;
     int userId;
     double meanTimeToNextJob = 12;// by default a user will try to generate a job every 12 hours
@@ -38,7 +40,7 @@ public:
 
     void execute(AbstractSimulator *simulator);
 
-    void addScheduler(Scheduler *scheduler) { this->scheduler = scheduler; };
+    void addScheduler(AbstractScheduler *scheduler) { this->scheduler = scheduler; };
 
     virtual double budgetLeft();
 
