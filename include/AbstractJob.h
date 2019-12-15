@@ -5,7 +5,7 @@
 
 #include <limits>
 #include "AbstractScheduler.h"
-#include "JobsSizes.h"
+#include "HPCParameters.h"
 #include "HPCSimulator.h"
 
 /*class JobQueue;*/
@@ -102,9 +102,9 @@ private:
 public:
     void insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
-    int maxNodes() { return JobsSizes::largeMaxNumberOfNode; };
+    int maxNodes() { return HPCParameters::largeMaxNumberOfNode; };
 
-    double maxTime() { return JobsSizes::largeMaximumTime; };
+    double maxTime() { return HPCParameters::largeMaximumTime; };
 
     void tryToExecute(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
@@ -123,9 +123,9 @@ public:
 
     void insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
-    int maxNodes() { return JobsSizes::mediumMaxNumberOfNode; };
+    int maxNodes() { return HPCParameters::mediumMaxNumberOfNode; };
 
-    double maxTime() { return JobsSizes::mediumMaximumTime; };
+    double maxTime() { return HPCParameters::mediumMaximumTime; };
 
     string getType() { return type; };
 
@@ -146,9 +146,9 @@ public:
 
     void insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
-    int maxNodes() { return JobsSizes::smallMaxNumberOfNode; };
+    int maxNodes() { return HPCParameters::smallMaxNumberOfNode; };
 
-    double maxTime() { return JobsSizes::smallMaximumTime; };
+    double maxTime() { return HPCParameters::smallMaximumTime; };
 
     /*
      * Assume that the job that you are trying to execute is the first in his queue
@@ -170,9 +170,9 @@ private:
 public:
     void insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
-    int maxNodes() { return JobsSizes::hugeMaxNumberOfNode; };
+    int maxNodes() { return HPCParameters::hugeMaxNumberOfNode; };
 
-    double maxTime() { return JobsSizes::hugeMaximumTime; };
+    double maxTime() { return HPCParameters::hugeMaximumTime; };
 
     string getType() { return type; };
 
@@ -190,9 +190,9 @@ public:
 
     void insertIn(AbstractSimulator *simulator, AbstractScheduler *scheduler);
 
-    int maxNodes() { return JobsSizes::gpuMaxNumberOfNode; };
+    int maxNodes() { return HPCParameters::gpuMaxNumberOfNode; };
 
-    double maxTime() { return JobsSizes::gpuMaximumTime; };
+    double maxTime() { return HPCParameters::gpuMaximumTime; };
 
     /*
      * Assume that the job that you are trying to execute is the first in his queue

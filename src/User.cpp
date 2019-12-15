@@ -30,9 +30,9 @@ void User::execute(AbstractSimulator *simulator) {
         //TODO assumption + GPU NODES
         double jobCost;
         if (job->isGpuJob()) {
-            jobCost = job->getExecutionDuration() * JobsSizes::costOneHourOneGPUNode * job->getNumberOfNodes();
+            jobCost = job->getExecutionDuration() * HPCParameters::costOneHourOneGPUNode * job->getNumberOfNodes();
         } else {
-            jobCost = job->getExecutionDuration() * JobsSizes::costOneHourOneNode * job->getNumberOfNodes();
+            jobCost = job->getExecutionDuration() * HPCParameters::costOneHourOneNode * job->getNumberOfNodes();
         }
 
         if (budgetLeft() - jobCost >= 0) {

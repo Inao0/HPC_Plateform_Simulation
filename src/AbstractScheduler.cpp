@@ -36,14 +36,14 @@ AbstractScheduler::~AbstractScheduler() {
 
 void Scheduler::addFreeMediumNode(AbstractSimulator *simulator, ReservedForMediumJobNode *node) {
     this->freeMediumNodes.push(node);
-    if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::mediumMaximumTime)) {
+    if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + HPCParameters::mediumMaximumTime)) {
         tryToExecuteNextMediumJob(simulator);
     }
 }
 
 void Scheduler::addFreeSmallNode(AbstractSimulator *simulator, ReservedForSmallJobNode *node) {
     this->freeSmallNodes.push(node);
-    if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::smallMaximumTime)) {
+    if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + HPCParameters::smallMaximumTime)) {
         tryToExecuteNextSmallJob(simulator);
     }
 }
@@ -58,7 +58,7 @@ void Scheduler::addFreeNode(class AbstractSimulator *simulator, class Node *node
 void Scheduler::addFreeGpuNode(AbstractSimulator *simulator, GpuNode *node) {
     this->freeGpuNodes.push(node);
     if (!gpuJobs->empty() && gpuJobs->front() == nextJob()) {
-        if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::gpuMaximumTime)) {
+        if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + HPCParameters::gpuMaximumTime)) {
             tryToExecuteNextGpuJob(simulator);
         } else {
             tryToExecuteNextNonGpuJobShortEnough(simulator);
@@ -71,7 +71,7 @@ void Scheduler::addFreeGpuNode(AbstractSimulator *simulator, GpuNode *node) {
 
 void Scheduler::insertMediumJob(AbstractSimulator *simulator, MediumJob *job) {
     if (!isDuringWeekend(simulator->now()) && mediumJobs->empty() &&
-        !isDuringWeekend(simulator->now() + JobsSizes::mediumMaximumTime)) {
+        !isDuringWeekend(simulator->now() + HPCParameters::mediumMaximumTime)) {
         mediumJobs->push_back(job);
         tryToExecuteNextMediumJob(simulator);
     } else {
@@ -81,7 +81,7 @@ void Scheduler::insertMediumJob(AbstractSimulator *simulator, MediumJob *job) {
 
 void Scheduler::insertSmallJob(AbstractSimulator *simulator, SmallJob *job) {
     if (!isDuringWeekend(simulator->now()) && smallJobs->empty() &&
-        !isDuringWeekend(simulator->now() + JobsSizes::smallMaximumTime)) {
+        !isDuringWeekend(simulator->now() + HPCParameters::smallMaximumTime)) {
         smallJobs->push_back(job);
         tryToExecuteNextSmallJob(simulator);
     } else {
@@ -91,7 +91,7 @@ void Scheduler::insertSmallJob(AbstractSimulator *simulator, SmallJob *job) {
 
 void Scheduler::insertGpuJob(AbstractSimulator *simulator, GpuJob *job) {
     if (!isDuringWeekend(simulator->now()) && gpuJobs->empty() &&
-        !isDuringWeekend(simulator->now() + JobsSizes::gpuMaximumTime)) {
+        !isDuringWeekend(simulator->now() + HPCParameters::gpuMaximumTime)) {
         gpuJobs->push_back(job);
         tryToExecuteNextGpuJob(simulator);
     } else {
@@ -102,7 +102,7 @@ void Scheduler::insertGpuJob(AbstractSimulator *simulator, GpuJob *job) {
 
 void Scheduler::insertLargeJob(class AbstractSimulator *simulator, class LargeJob *job) {
     if (!isDuringWeekend(simulator->now()) && largeJobs->empty() &&
-        !isDuringWeekend(simulator->now() + JobsSizes::largeMaximumTime)) {
+        !isDuringWeekend(simulator->now() + HPCParameters::largeMaximumTime)) {
         largeJobs->push_back(job);
         tryToExecuteNextLargeJob(simulator);
     } else {
@@ -157,21 +157,21 @@ AbstractJob *Scheduler::nextJob() {
  */
 void Scheduler::tryToExecuteNextNonGpuJobShortEnough(AbstractSimulator *simulator) {
     AbstractJob *job;
-    if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::largeMaximumTime)) {
+    if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + HPCParameters::largeMaximumTime)) {
         job = nextNonGpuJob();
         if (job != nullptr) {
             job->tryToExecute(simulator, this);
             return;
         }
     } else if (!isDuringWeekend(simulator->now()) &&
-               !isDuringWeekend(simulator->now() + JobsSizes::mediumMaximumTime)) {
+               !isDuringWeekend(simulator->now() + HPCParameters::mediumMaximumTime)) {
         if (mediumJobs->empty() || (!smallJobs->empty() && *(mediumJobs->front()) < *(smallJobs->front()))) {
             tryToExecuteNextSmallJob(simulator);
             return;
         }
         tryToExecuteNextMediumJob(simulator);
         return;
-    } else if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::smallMaximumTime)) {
+    } else if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + HPCParameters::smallMaximumTime)) {
         tryToExecuteNextSmallJob(simulator);
     }
 }

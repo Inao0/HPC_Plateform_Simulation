@@ -3,7 +3,7 @@
 
 #include <unordered_set>
 #include "AbstractScheduler.h"
-#include "JobsSizes.h"
+#include "HPCParameters.h"
 /**
 * Generate a stream of jobs for 8.0 time units.
 */
@@ -12,7 +12,7 @@ class AbstractScheduler;
 class User : public Event {
 protected:
     double budget = 0;
-    int instantaneousMaxNumberOfNodes = JobsSizes::TotalNumberOfNodes;
+    int instantaneousMaxNumberOfNodes = HPCParameters::TotalNumberOfNodes;
     int currentlyUsedNumberOfNodes = 0;
     AbstractScheduler *scheduler;
     static int numOfUsers;
