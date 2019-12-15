@@ -3,6 +3,8 @@
 #include "../include/User.h"
 
 
+bool comparingJobsPointersPriority(AbstractJob *i, AbstractJob *j) { return i->priority() < j->priority(); }
+
 /*
  * Assuming that the simulation start at Monday 9 AM.
  */
@@ -38,32 +40,23 @@ void Scheduler::addFreeSmallNode(AbstractSimulator *simulator, ReservedForSmallJ
     }
 }
 
-void Scheduler::addFreeGpuNode(AbstractSimulator *simulator, GpuNode *node) {
-    this->freeGpuNodes.push(node);
-    if (gpuJobs->front() != nullptr && isDuringWeekend(simulator->now() + gpuJobs->front()->maxTime())) {// TODO MODIFY{
-        tryToExecuteNextGpuJob(simulator);
-    }
-}
-
+//TO-DO -update- with GPU : No need as a gpu job doesn't want to run on a normal node.
 void Scheduler::addFreeNode(class AbstractSimulator *simulator, class Node *node) {
     this->freeNodes.push(node);
-    AbstractJob *job;
-    if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::largeMaximumTime)) {
-        job = nextJob();
-        if (job != nullptr) {
-            job->tryToExecute(simulator, this);
-            return;
+    tryToExecuteNextNonGpuJobShortEnough(simulator); //priority to large Job
+
+}
+
+void Scheduler::addFreeGpuNode(AbstractSimulator *simulator, GpuNode *node) {
+    this->freeGpuNodes.push(node);
+    if (!gpuJobs->empty() && gpuJobs->front() == nextJob()) {
+        if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::gpuMaximumTime)) {
+            tryToExecuteNextGpuJob(simulator);
+        } else {
+            tryToExecuteNextNonGpuJobShortEnough(simulator);
         }
-    } else if (!isDuringWeekend(simulator->now()) &&
-               !isDuringWeekend(simulator->now() + JobsSizes::mediumMaximumTime)) {
-        if (mediumJobs->empty() || (!smallJobs->empty() && *(smallJobs->front()) < *(mediumJobs->front()))) {
-            tryToExecuteNextSmallJob(simulator);
-            return;
-        }
-        tryToExecuteNextMediumJob(simulator);
-        return;
-    } else if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::smallMaximumTime)) {
-        tryToExecuteNextSmallJob(simulator);
+    } else {
+        tryToExecuteNextNonGpuJobShortEnough(simulator);
     }
 }
 
@@ -93,7 +86,8 @@ void Scheduler::insertSmallJob(AbstractSimulator *simulator, SmallJob *job) {
 }
 
 void Scheduler::insertGpuJob(AbstractSimulator *simulator, GpuJob *job) {
-    if (gpuJobs->empty()) {
+    if (!isDuringWeekend(simulator->now()) && gpuJobs->empty() &&
+        !isDuringWeekend(simulator->now() + JobsSizes::gpuMaximumTime)) {
         gpuJobs->push_back(job);
         tryToExecuteNextGpuJob(simulator);
     } else {
@@ -116,18 +110,18 @@ void Scheduler::insertHugeJob(AbstractSimulator *simulator, HugeJob *job) {
     hugeJobs->push_back(job);
 }
 
-AbstractJob *Scheduler::nextJob() {
+//TODO TEST THAT
+AbstractJob *Scheduler::nextNonGpuJob() {
     std::vector<AbstractJob *> nextJobs;
+
     MediumJob *nextMediumJob;
-    if (!mediumJobs->empty()) { //TODO Improve
+    if (!mediumJobs->empty()) {
         nextJobs.push_back(mediumJobs->front());
     }
     if (!largeJobs->empty()) {
         nextJobs.push_back(largeJobs->front());
     }
-    if (!gpuJobs->empty()) {
-        nextJobs.push_back(gpuJobs->front());
-    }
+
     if (!smallJobs->empty()) {
         nextJobs.push_back(smallJobs->front());
     }
@@ -135,96 +129,204 @@ AbstractJob *Scheduler::nextJob() {
     if (nextJobs.empty()) {
         return nullptr;
     }
-    auto nextJobIt = max_element(std::begin(nextJobs), std::end(nextJobs));
+    // TO-DO :especially this
+    auto nextJobIt = max_element(std::begin(nextJobs), std::end(nextJobs), comparingJobsPointersPriority);
     return *nextJobIt;
 }
 
-void Scheduler::tryToExecuteNextLargeJob(AbstractSimulator *simulator) { //TODO : IMPROVE
-    LargeJob *nextLargeJob = largeJobs->front();
-    if (nextLargeJob != nullptr && freeNodes.size() >= nextLargeJob->getNumberOfNodes()) {
-        for (int i = 0; i < nextLargeJob->getNumberOfNodes(); ++i) {
-            Node *node = freeNodes.front();
-            freeNodes.pop();
-            node->insert(simulator, nextLargeJob);
+//TODO TEST ALSO THAT
+AbstractJob *Scheduler::nextJob() {
+    AbstractJob *nextNotGpuJob = nextNonGpuJob();
+    if (!gpuJobs->empty()) {
+        AbstractJob *nextGpuJob = gpuJobs->front();
+        if (nextNotGpuJob == nullptr) {
+            return nextGpuJob;
+        } else {
+            return max(nextGpuJob, nextNotGpuJob, comparingJobsPointersPriority);
         }
-        largeJobs->pop_front();
+    }
+    return nextNonGpuJob();
+}
+
+/*
+ * According to priorities
+ */
+void Scheduler::tryToExecuteNextNonGpuJobShortEnough(AbstractSimulator *simulator) {
+    AbstractJob *job;
+    if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::largeMaximumTime)) {
+        job = nextNonGpuJob();
+        if (job != nullptr) {
+            job->tryToExecute(simulator, this);
+            return;
+        }
+    } else if (!isDuringWeekend(simulator->now()) &&
+               !isDuringWeekend(simulator->now() + JobsSizes::mediumMaximumTime)) {
+        if (mediumJobs->empty() || (!smallJobs->empty() && *(mediumJobs->front()) < *(smallJobs->front()))) {
+            tryToExecuteNextSmallJob(simulator);
+            return;
+        }
+        tryToExecuteNextMediumJob(simulator);
+        return;
+    } else if (!isDuringWeekend(simulator->now()) && !isDuringWeekend(simulator->now() + JobsSizes::smallMaximumTime)) {
+        tryToExecuteNextSmallJob(simulator);
     }
 }
 
-void Scheduler::tryToExecuteNextMediumJob(AbstractSimulator *simulator) { //TODO : IMPROVE
-    AbstractJob *nextMediumJob = mediumJobs->front();
-    if (nextMediumJob != nullptr && freeMediumNodes.size() >= nextMediumJob->getNumberOfNodes()) {
-        for (int i = 0; i < nextMediumJob->getNumberOfNodes(); ++i) {
-            Node *node = freeMediumNodes.front();
-            freeMediumNodes.pop();
-            node->insert(simulator, nextMediumJob);
+
+/*
+ * Take into account priority.
+ *
+ */
+void Scheduler::tryToExecuteNextLargeJob(AbstractSimulator *simulator) {
+
+    LargeJob *nextLargeJob;
+    if (!largeJobs->empty()) {
+        nextLargeJob = largeJobs->front();
+        if (nextLargeJob == nextJob() &&
+            (freeNodes.size() + freeGpuNodes.size()) >= nextLargeJob->getNumberOfNodes()) {
+            for (int i = 0; i < nextLargeJob->getNumberOfNodes(); ++i) {
+                Node *node;
+                if (!freeNodes.empty()) {
+                    node = freeNodes.front();
+                    freeNodes.pop();
+                } else {
+                    node = freeGpuNodes.front();
+                    freeGpuNodes.pop();
+                }
+                node->insert(simulator, nextLargeJob);
+            }
+            largeJobs->pop_front();
+        } else if (nextLargeJob == nextNonGpuJob() && freeNodes.size() >= nextLargeJob->getNumberOfNodes()) {
+            for (int i = 0; i < nextLargeJob->getNumberOfNodes(); ++i) {
+                Node *node = freeNodes.front();
+                freeNodes.pop();
+                node->insert(simulator, nextLargeJob);
+            }
+            largeJobs->pop_front();
         }
-        mediumJobs->pop_front();
-        return;
-    } else if (nextMediumJob != NULL &&
-               (freeMediumNodes.size() + freeNodes.size()) >= nextMediumJob->getNumberOfNodes() &&
-               nextMediumJob == nextJob()) { //TODO check for small jobs too ! CODE DUPLICATION
-        for (int i = 0; i < nextMediumJob->getNumberOfNodes(); ++i) {
-            if (!freeMediumNodes.empty()) {
+    }
+}
+
+
+void Scheduler::tryToExecuteNextMediumJob(AbstractSimulator *simulator) {
+    AbstractJob *nextMediumJob;
+    if (!mediumJobs->empty()) {
+        nextMediumJob = mediumJobs->front();
+        if (nextMediumJob == nextJob() &&
+            (freeMediumNodes.size() + freeNodes.size() + freeGpuNodes.size()) >=
+            nextMediumJob->getNumberOfNodes()) {
+            for (int i = 0; i < nextMediumJob->getNumberOfNodes(); ++i) {
+                Node *node;
+                if (!freeMediumNodes.empty()) {
+                    node = freeMediumNodes.front();
+                    freeMediumNodes.pop();
+
+                } else if (!freeNodes.empty()) {
+                    node = freeNodes.front();
+                    freeNodes.pop();
+                } else {
+                    node = freeGpuNodes.front();
+                    freeGpuNodes.pop();
+                }
+                node->insert(simulator, nextMediumJob);
+            }
+            mediumJobs->pop_front();
+            return;
+        } else if ((freeMediumNodes.size() + freeNodes.size()) >= nextMediumJob->getNumberOfNodes() &&
+                   nextMediumJob == nextNonGpuJob()) {
+            for (int i = 0; i < nextMediumJob->getNumberOfNodes(); ++i) {
+                Node *node;
+                if (!freeMediumNodes.empty()) {
+                    node = freeMediumNodes.front();
+                    freeMediumNodes.pop();
+
+                } else {
+                    node = freeNodes.front();
+                    freeNodes.pop();
+                }
+                node->insert(simulator, nextMediumJob);
+            }
+            mediumJobs->pop_front();
+            return;
+        } else if (freeMediumNodes.size() >= nextMediumJob->getNumberOfNodes()) {
+            for (int i = 0; i < nextMediumJob->getNumberOfNodes(); ++i) {
                 Node *node = freeMediumNodes.front();
                 freeMediumNodes.pop();
                 node->insert(simulator, nextMediumJob);
-            } else {
-                if (!freeNodes.empty()) {
-                    Node *node = freeNodes.front();
-                    freeNodes.pop();
-                    node->insert(simulator, nextMediumJob);
-                }
             }
+            mediumJobs->pop_front();
+            return;
         }
-        mediumJobs->pop_front();
-        return;
     }
-}
 
+}
 
 void Scheduler::tryToExecuteNextGpuJob(AbstractSimulator *simulator) {
-    AbstractJob *nextGPUJob = gpuJobs->front();
-    if (nextGPUJob != nullptr && freeGpuNodes.size() >= nextGPUJob->getNumberOfNodes()) {
-        for (int i = 0; i < nextGPUJob->getNumberOfNodes(); ++i) {
-            Node *node = freeNodes.front();
-            freeNodes.pop();
-            node->insert(simulator, nextGPUJob);
+    AbstractJob *nextGPUJob;
+    if (!gpuJobs->empty()) {
+        nextGPUJob = gpuJobs->front();
+        if (nextGPUJob == nextJob() && freeGpuNodes.size() >= nextGPUJob->getNumberOfNodes()) {
+            for (int i = 0; i < nextGPUJob->getNumberOfNodes(); ++i) {
+                Node *node = freeGpuNodes.front();
+                freeGpuNodes.pop();
+                node->insert(simulator, nextGPUJob);
+            }
+            gpuJobs->pop_front();
         }
-        gpuJobs->pop_front();
     }
-
 }
 
-void Scheduler::tryToExecuteNextSmallJob(AbstractSimulator *simulator) { //TODO : IMPROVE
-    AbstractJob *nextSmallJob = smallJobs->front();
-    if (nextSmallJob != nullptr && freeSmallNodes.size() >= nextSmallJob->getNumberOfNodes()) {
-        for (int i = 0; i < nextSmallJob->getNumberOfNodes(); ++i) {
-            Node *node = freeSmallNodes.front();
-            freeSmallNodes.pop();
-            node->insert(simulator, nextSmallJob);
-        }
-        smallJobs->pop_front();
-        return;
-    } else if (nextSmallJob != nullptr &&
-               (freeSmallNodes.size() + freeNodes.size()) >= nextSmallJob->getNumberOfNodes() &&
-               nextSmallJob == nextJob()) {
-        for (int i = 0; i < nextSmallJob->getNumberOfNodes(); ++i) {
-            if (!freeSmallNodes.empty()) {
+
+void Scheduler::tryToExecuteNextSmallJob(AbstractSimulator *simulator) {
+    AbstractJob *nextSmallJob;
+    if (!smallJobs->empty()) {
+        nextSmallJob = smallJobs->front();
+        if (nextSmallJob == nextJob() &&
+            (freeSmallNodes.size() + freeNodes.size() + freeGpuNodes.size()) >=
+            nextSmallJob->getNumberOfNodes()) {
+            for (int i = 0; i < nextSmallJob->getNumberOfNodes(); ++i) {
+                Node *node;
+                if (!freeSmallNodes.empty()) {
+                    node = freeSmallNodes.front();
+                    freeSmallNodes.pop();
+
+                } else if (!freeNodes.empty()) {
+                    node = freeNodes.front();
+                    freeNodes.pop();
+                } else {
+                    node = freeGpuNodes.front();
+                    freeGpuNodes.pop();
+                }
+                node->insert(simulator, nextSmallJob);
+            }
+            smallJobs->pop_front();
+            return;
+        } else if ((freeSmallNodes.size() + freeNodes.size()) >= nextSmallJob->getNumberOfNodes() &&
+                   nextSmallJob == nextNonGpuJob()) {
+            for (int i = 0; i < nextSmallJob->getNumberOfNodes(); ++i) {
+                Node *node;
+                if (!freeSmallNodes.empty()) {
+                    node = freeSmallNodes.front();
+                    freeSmallNodes.pop();
+                } else {
+                    node = freeNodes.front();
+                    freeNodes.pop();
+                }
+                node->insert(simulator, nextSmallJob);
+            }
+            smallJobs->pop_front();
+            return;
+        } else if (freeSmallNodes.size() >= nextSmallJob->getNumberOfNodes()) {
+            for (int i = 0; i < nextSmallJob->getNumberOfNodes(); ++i) {
                 Node *node = freeSmallNodes.front();
                 freeSmallNodes.pop();
                 node->insert(simulator, nextSmallJob);
-            } else {
-                if (!freeNodes.empty()) {
-                    Node *node = freeNodes.front();
-                    freeNodes.pop();
-                    node->insert(simulator, nextSmallJob);
-                }
             }
+            smallJobs->pop_front();
+            return;
         }
-        smallJobs->pop_front();
-        return;
     }
+
 }
 
 Scheduler::~Scheduler() {
@@ -240,7 +342,8 @@ void Scheduler::tryToExecuteNextHugeJobs(AbstractSimulator *simulator) {
     do {
         previousHugeQueueSize = hugeJobs->size();
         AbstractJob *nextHugeJob = hugeJobs->front();
-        int totalNumberOfNodesAvailable = freeNodes.size() + freeMediumNodes.size() + freeSmallNodes.size();//TODO GPU
+        int totalNumberOfNodesAvailable =
+                freeNodes.size() + freeMediumNodes.size() + freeSmallNodes.size() + freeGpuNodes.size();
         if (nextHugeJob != nullptr && nextHugeJob->getNumberOfNodes() < totalNumberOfNodesAvailable) {
             for (int i = 0; i < nextHugeJob->getNumberOfNodes(); ++i) {
                 Node *node;
@@ -250,9 +353,12 @@ void Scheduler::tryToExecuteNextHugeJobs(AbstractSimulator *simulator) {
                 } else if (!freeMediumNodes.empty()) {
                     node = freeMediumNodes.front();
                     freeMediumNodes.pop();
-                } else {
+                } else if (!freeNodes.empty()) {
                     node = freeNodes.front();
                     freeNodes.pop();
+                } else {
+                    node = freeGpuNodes.front();
+                    freeGpuNodes.pop();
                 }
                 node->insert(simulator, nextHugeJob);
             }
@@ -261,6 +367,10 @@ void Scheduler::tryToExecuteNextHugeJobs(AbstractSimulator *simulator) {
     } while (previousHugeQueueSize > hugeJobs->size());
 }
 
+/*
+ * Do not check for the week-end
+ * Normally ran only at the begining of the week
+*/
 void Scheduler::tryToExecuteNextJobs(AbstractSimulator *simulator) {
     int previousNumberOfJobWaiting;
     do {
@@ -269,10 +379,16 @@ void Scheduler::tryToExecuteNextJobs(AbstractSimulator *simulator) {
             nextJob()->tryToExecute(simulator, this);
         }
     } while (previousNumberOfJobWaiting > totalOfNonHugeJobsWaiting());
+    do {
+        previousNumberOfJobWaiting = totalOfNonHugeJobsWaiting();
+        if (nextNonGpuJob() != nullptr) {
+            nextNonGpuJob()->tryToExecute(simulator, this);
+        }
+    } while (previousNumberOfJobWaiting > totalOfNonHugeJobsWaiting());
 }
 
 int Scheduler::totalOfNonHugeJobsWaiting() {
-    return smallJobs->size() + mediumJobs->size() + largeJobs->size();
+    return smallJobs->size() + mediumJobs->size() + largeJobs->size() + gpuJobs->size();
 }
 
 
@@ -289,7 +405,7 @@ public:
     /**
      * return the first customer in the queue
     *//*
-    Job* nextJob();
+    Job* nextNonGpuJob();
     void addFreeNode(Node* node) {this->freeNodes.push(node);}
 
 };

@@ -34,11 +34,14 @@ private:
 
 public:
 
+    /* Do not take into account week-end*/
     void tryToExecuteNextLargeJob(AbstractSimulator* simulator);
     void tryToExecuteNextMediumJob(AbstractSimulator* simulator);
 	void tryToExecuteNextSmallJob(AbstractSimulator* simulator);
     void tryToExecuteNextHugeJobs(AbstractSimulator *simulator);
 	void tryToExecuteNextGpuJob(AbstractSimulator* simulator);
+
+	void tryToExecuteNextNonGpuJobShortEnough (AbstractSimulator *simulator);
 
     Scheduler();
     Scheduler(const Scheduler &scheduler) = delete;
@@ -51,6 +54,7 @@ public:
 	void addFreeGpuNode(AbstractSimulator* simulator, GpuNode* node);
     double costPerHourPerNode();
 
+    AbstractJob* nextNonGpuJob();
     AbstractJob* nextJob();
 
     void insertMediumJob(AbstractSimulator *simulator, MediumJob *job);

@@ -10,30 +10,46 @@
 
 void HPCSimulator::start() {
     auto *scheduler = new Scheduler();
-
     events = new ListQueue();
-//TODO change this crap
-    int numberOfWeeks = 8;
-    auto *weekendBegin = new WeekendBegin(numberOfWeeks, scheduler);
-    auto *weekendEnd = new WeekendEnd(numberOfWeeks, scheduler);
+
+    auto *weekendBegin = new WeekendBegin(scheduler);
+    auto *weekendEnd = new WeekendEnd(scheduler);
     insert(weekendBegin);
     insert(weekendEnd);
 
     /* Create the generator, queue, and simulator */
     /* Connect them together. */
+    int numberOfNodesAdded = 0;
     std::vector<Node *> nodes;
-    for (int i = 0; i < JobsSizes::TotalNumberOfNodes; ++i) {
+    for (int i = 0; i < JobsSizes::NumberOfGpuNodes; ++i) {
+        nodes.push_back(new GpuNode());
+        numberOfNodesAdded++;
+    }
+    for (int i = 0; i < 0.1 * JobsSizes::TotalNumberOfNodes; ++i) {
+        nodes.push_back(new ReservedForSmallJobNode());
+        numberOfNodesAdded++;
+    }
+    for (int i = 0; i < 0.3 * JobsSizes::TotalNumberOfNodes; ++i) {
+        nodes.push_back(new ReservedForMediumJobNode());
+        numberOfNodesAdded++;
+    }
+    for (int i = numberOfNodesAdded; i < JobsSizes::TotalNumberOfNodes; i++) {
         nodes.push_back(new Node());
+        numberOfNodesAdded++;
     }
     for (auto &node : nodes) {
         scheduler->addFreeNode(this, node);
         node->addScheduler(scheduler);
     }
+
+    cout << numberOfNodesAdded << "nodes added to the scheduler \n";
+
+
     for (User *user : users) {
         user->addScheduler(scheduler);
         insert(user);
     }
-    cout<<users.size()<< " users inserted in the timeline \n";
+    cout << users.size() << " users inserted in the timeline \n";
     doAllEvents();
 
     // free the memory, note that events is freed in the base class destructor
