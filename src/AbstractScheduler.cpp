@@ -338,9 +338,8 @@ void Scheduler::tryToExecuteNextSmallJob(AbstractSimulator *simulator) {
 void Scheduler::tryToExecuteNextHugeJobs(AbstractSimulator *simulator) {
     int previousHugeQueueSize;
     do {
+        previousHugeQueueSize = hugeJobs->size();
         if (!hugeJobs->empty()) {
-            previousHugeQueueSize = hugeJobs->size();
-
             AbstractJob *nextHugeJob = hugeJobs->front();
             int totalNumberOfNodesAvailable =
                     freeNodes.size() + freeMediumNodes.size() + freeSmallNodes.size() + freeGpuNodes.size();
