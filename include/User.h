@@ -16,6 +16,8 @@ protected:
     static int numOfUsers;
     int userId;
     double meanTimeToNextJob = 12;// by default a user will try to generate a job every 12 hours
+    bool permissions[5]={0, 0, 0, 0, 0};
+
 
 public:
     double getMeanTimeToNextJob() const;
@@ -45,6 +47,8 @@ public:
     void reduceNumberOfCurrentlyUsedNodeBy(int numberOfNodes) {
         currentlyUsedNumberOfNodes -= numberOfNodes;
     };
+
+    void setPermission (bool small,bool medium,bool large,bool huge,bool gpu);
 
 };
 

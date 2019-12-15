@@ -23,16 +23,16 @@ Inspired by Generator
 */
 void User::execute(AbstractSimulator *simulator) {
     Event::execute(simulator);
-    AbstractJob *job = CreateRandomJob();
+    AbstractJob *job = CreateRandomJob(permissions);
     job->generateRandomRequirements();
     if (currentlyUsedNumberOfNodes + job->getNumberOfNodes() <= instantaneousMaxNumberOfNodes) {
         // keep the simulator going until next planned job is too large
         //TODO assumption + GPU NODES
         double jobCost;
         if (job->isGpuJob()) {
-            jobCost = job->getExecutionTime() * scheduler->costPerHourPerGpuNode() * job->getNumberOfNodes();
+            jobCost = job->getExecutionTime() * JobsSizes::costOneHourOneGPUNode * job->getNumberOfNodes();
         } else {
-            jobCost = job->getExecutionTime() * scheduler->costPerHourPerNode() * job->getNumberOfNodes();
+            jobCost = job->getExecutionTime() * JobsSizes::costOneHourOneNode * job->getNumberOfNodes();
         }
 
         if (budgetLeft() - jobCost >= 0) {
@@ -89,6 +89,14 @@ double User::getMeanTimeToNextJob() const {
 
 void User::setMeanTimeToNextJob(double meanTimeToNextJob) {
     User::meanTimeToNextJob = meanTimeToNextJob;
+}
+
+void User::setPermission(bool small, bool medium, bool large, bool huge, bool gpu) {
+    permissions[0] = small;
+    permissions[1] = medium;
+    permissions[2] = large;
+    permissions[3] = huge;
+    permissions[4] = gpu;
 }
 
 

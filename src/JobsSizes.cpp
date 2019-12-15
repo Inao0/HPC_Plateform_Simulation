@@ -3,3 +3,4 @@
 //
 
 #include "../include/JobsSizes.h"
+const std::vector<int> JobsSizes::jobTypeProportions = {30,30,15,5,10};

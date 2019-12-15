@@ -1,6 +1,7 @@
 #include "../include/AbstractJob.h"
 #include "../include/User.h"
 #include "../include/random.h"
+#include "../include/JobsSizes.h"
 
 /*RESOURCE from stackoverflow https://stackoverflow.com/questions/7803345/how-to-randomly-select-a-class-to-instantiate-without-using-switch
  * about generating randomly one of the different subclasses */
@@ -22,7 +23,6 @@ CreateJobFn create[] =
                 &CreateJob<LargeJob>,
                 &CreateJob<MediumJob>,
                 &CreateJob<SmallJob>,
-                &CreateJob<MediumJob>,
                 &CreateJob<HugeJob>,
 				&CreateJob<GpuJob>
 
@@ -31,8 +31,18 @@ CreateJobFn create[] =
 
 const size_t fncount = sizeof(create) / sizeof(*create);
 
-AbstractJob *CreateRandomJob() {
-    return create[rand() % fncount](); //forward the call
+AbstractJob *CreateRandomJob(const bool permissions[5]) {
+    std::vector <int> proportionsWithPermissions= {0,0,0,0,0};
+    for (int i = 0; i < 5; ++i) {
+        if (permissions[i]){
+            proportionsWithPermissions[i]=JobsSizes::jobTypeProportions[i];
+        }
+    }
+    std::random_device randomDevice;
+    std::mt19937 randomGenerator(randomDevice());
+    std::discrete_distribution<int> distribution (proportionsWithPermissions.begin(),proportionsWithPermissions.end());
+
+    return create[ distribution (randomGenerator)](); //forward the call
 }
 
 void LargeJob::insertIn(AbstractSimulator *simulator, Scheduler *scheduler) {

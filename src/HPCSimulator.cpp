@@ -97,7 +97,7 @@ void HPCSimulator::initialisation(string filename) {
                 permissions[i] = ('1' == line[indexFirstSpace + 1 + 2 * i]);
             }
 
-            //Average Time Between Two Jobs line
+            //Average Time Between Two Jo1bs line
             getline(inputStream, line);
             averageTimeBetweenJobs = std::stod(line.substr(line.find(' ') + 1, line.size() - 1));
 
@@ -128,6 +128,7 @@ void HPCSimulator::initialisation(string filename) {
                 if (j < individualGrants.size()) {
                     researcher->addIndividualGrant(individualGrants[j]);
                 }
+                researcher->setPermission(permissions[0],permissions[1],permissions[2],permissions[3],permissions[4]);
                 users.push_back(researcher);
             }
 
@@ -178,7 +179,9 @@ void HPCSimulator::initialisation(string filename) {
 
 
             for (int j = 0; j < numberOfStudents; ++j) {
-                users.push_back(new Student(curriculum, averageTimeBetweenJobs));
+                Student *student = new Student(curriculum, averageTimeBetweenJobs);
+                student->setPermission(permissions[0],permissions[1],permissions[2],permissions[3],permissions[4]);
+                users.push_back(student);
             }
 
             cout << " Curriculum : " << cummulativeCap << "," << instantanousCap << ',' << permissions[0]

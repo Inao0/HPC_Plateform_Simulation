@@ -6,6 +6,8 @@
 #define SUPERCOMPUTERSIMULATION_JOBSSIZES_H
 
 
+#include <vector>
+
 class JobsSizes {
 public:
     static const int TotalNumberOfNodes = 128;
@@ -26,7 +28,13 @@ public:
 
     constexpr const static double gpuMaximumTime = largeMaximumTime;
     const static int gpuMaxNumberOfNode = NumberOfGpuNodes;
-};
 
+    //relative proportions of the different types of jobs : small, medium, large, huge, gpu
+    const static std::vector<int> jobTypeProportions;
+
+    constexpr double const static costOneHourOneNode = 1;
+    constexpr double const static costOneHourOneGPUNode = 1.1;
+
+};
 
 #endif //SUPERCOMPUTERSIMULATION_JOBSSIZES_H

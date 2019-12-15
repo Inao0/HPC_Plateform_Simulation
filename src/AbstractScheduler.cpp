@@ -60,13 +60,6 @@ void Scheduler::addFreeGpuNode(AbstractSimulator *simulator, GpuNode *node) {
     }
 }
 
-double Scheduler::costPerHourPerNode() {
-    return (costOneHourOneNode);
-}
-double Scheduler::costPerHourPerGpuNode(){
-    return (costOneHourOneGPUNode);
-}
-
 
 void Scheduler::insertMediumJob(AbstractSimulator *simulator, MediumJob *job) {
     if (!isDuringWeekend(simulator->now()) && mediumJobs->empty() &&

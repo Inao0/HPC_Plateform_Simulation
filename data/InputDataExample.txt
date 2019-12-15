@@ -28,14 +28,14 @@ NumberOfResearchers 2
 # The cumulative and instantaneous caps apply to each student of the curriculum  #
 # Each curriculum should be described respecting the following format            #
 CumulativeCap 1000
-InstantaneousCap 20
-Permissions 0 1 1 1 0
+InstantaneousCap 30
+Permissions 1 1 1 0 1
 AverageTimeBetweenTwoJobs 18
 NumberOfStudents 5
 
 CumulativeCap 1000
 InstantaneousCap 20
-Permissions 0 1 1 1 0
+Permissions 1 1 0 0 0
 AverageTimeBetweenTwoJobs 18
 NumberOfStudents 5
 

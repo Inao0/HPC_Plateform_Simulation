@@ -197,6 +197,6 @@ public:
 
 typedef AbstractJob *(*CreateJobFn)();
 
-AbstractJob *CreateRandomJob();
+AbstractJob *CreateRandomJob(const bool permissions[5]);
 
 #endif
