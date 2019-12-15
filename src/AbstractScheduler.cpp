@@ -338,29 +338,32 @@ void Scheduler::tryToExecuteNextSmallJob(AbstractSimulator *simulator) {
 void Scheduler::tryToExecuteNextHugeJobs(AbstractSimulator *simulator) {
     int previousHugeQueueSize;
     do {
-        previousHugeQueueSize = hugeJobs->size();
-        AbstractJob *nextHugeJob = hugeJobs->front();
-        int totalNumberOfNodesAvailable =
-                freeNodes.size() + freeMediumNodes.size() + freeSmallNodes.size() + freeGpuNodes.size();
-        if (nextHugeJob != nullptr && nextHugeJob->getNumberOfNodes() < totalNumberOfNodesAvailable) {
-            for (int i = 0; i < nextHugeJob->getNumberOfNodes(); ++i) {
-                Node *node;
-                if (!freeSmallNodes.empty()) {
-                    node = freeSmallNodes.front();
-                    freeSmallNodes.pop();
-                } else if (!freeMediumNodes.empty()) {
-                    node = freeMediumNodes.front();
-                    freeMediumNodes.pop();
-                } else if (!freeNodes.empty()) {
-                    node = freeNodes.front();
-                    freeNodes.pop();
-                } else {
-                    node = freeGpuNodes.front();
-                    freeGpuNodes.pop();
+        if (!hugeJobs->empty()) {
+            previousHugeQueueSize = hugeJobs->size();
+
+            AbstractJob *nextHugeJob = hugeJobs->front();
+            int totalNumberOfNodesAvailable =
+                    freeNodes.size() + freeMediumNodes.size() + freeSmallNodes.size() + freeGpuNodes.size();
+            if (nextHugeJob != nullptr && nextHugeJob->getNumberOfNodes() < totalNumberOfNodesAvailable) {
+                for (int i = 0; i < nextHugeJob->getNumberOfNodes(); ++i) {
+                    Node *node;
+                    if (!freeSmallNodes.empty()) {
+                        node = freeSmallNodes.front();
+                        freeSmallNodes.pop();
+                    } else if (!freeMediumNodes.empty()) {
+                        node = freeMediumNodes.front();
+                        freeMediumNodes.pop();
+                    } else if (!freeNodes.empty()) {
+                        node = freeNodes.front();
+                        freeNodes.pop();
+                    } else {
+                        node = freeGpuNodes.front();
+                        freeGpuNodes.pop();
+                    }
+                    node->insert(simulator, nextHugeJob);
                 }
-                node->insert(simulator, nextHugeJob);
+                hugeJobs->pop_front();
             }
-            hugeJobs->pop_front();
         }
     } while (previousHugeQueueSize > hugeJobs->size());
 }
