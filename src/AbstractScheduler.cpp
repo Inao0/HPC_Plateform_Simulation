@@ -63,6 +63,9 @@ void Scheduler::addFreeGpuNode(AbstractSimulator *simulator, GpuNode *node) {
 double Scheduler::costPerHourPerNode() {
     return (costOneHourOneNode);
 }
+double Scheduler::costPerHourPerGpuNode(){
+    return (costOneHourOneGPUNode);
+}
 
 
 void Scheduler::insertMediumJob(AbstractSimulator *simulator, MediumJob *job) {
@@ -390,6 +393,7 @@ void Scheduler::tryToExecuteNextJobs(AbstractSimulator *simulator) {
 int Scheduler::totalOfNonHugeJobsWaiting() {
     return smallJobs->size() + mediumJobs->size() + largeJobs->size() + gpuJobs->size();
 }
+
 
 
 

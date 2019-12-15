@@ -31,6 +31,7 @@ private:
 	std::queue<Node*> freeGpuNodes;
 	std::queue<Node *> freeNodes;
     double const costOneHourOneNode = 1;
+    double const costOneHourOneGPUNode = 1.1;
 
 public:
 
@@ -52,15 +53,18 @@ public:
     void addFreeMediumNode(AbstractSimulator *simulator, ReservedForMediumJobNode* node);
 	void addFreeSmallNode(AbstractSimulator* simulator, ReservedForSmallJobNode* node);
 	void addFreeGpuNode(AbstractSimulator* simulator, GpuNode* node);
+
     double costPerHourPerNode();
+    double costPerHourPerGpuNode();
 
     AbstractJob* nextNonGpuJob();
-    AbstractJob* nextJob();
 
+    AbstractJob* nextJob();
     void insertMediumJob(AbstractSimulator *simulator, MediumJob *job);
-	void insertSmallJob(AbstractSimulator* simulator, SmallJob* job);
+    void insertSmallJob(AbstractSimulator* simulator, SmallJob* job);
     void insertLargeJob(AbstractSimulator *simulator, LargeJob *job);
-	void insertGpuJob(AbstractSimulator* simulator, GpuJob *job);
+    void insertGpuJob(AbstractSimulator* simulator, GpuJob *job);
+
     void insertHugeJob(AbstractSimulator *simulator, HugeJob *job) ;
 
     void tryToExecuteNextJobs(AbstractSimulator *pSimulator);

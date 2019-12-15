@@ -28,13 +28,19 @@ void User::execute(AbstractSimulator *simulator) {
     if (currentlyUsedNumberOfNodes + job->getNumberOfNodes() <= instantaneousMaxNumberOfNodes) {
         // keep the simulator going until next planned job is too large
         //TODO assumption + GPU NODES
-        if (budgetLeft() - ((job->getExecutionTime() * scheduler->costPerHourPerNode()) * job->getNumberOfNodes()) >=
-            0) {
+        double jobCost;
+        if (job->isGpuJob()) {
+            jobCost = job->getExecutionTime() * scheduler->costPerHourPerGpuNode() * job->getNumberOfNodes();
+        } else {
+            jobCost = job->getExecutionTime() * scheduler->costPerHourPerNode() * job->getNumberOfNodes();
+        }
+
+        if (budgetLeft() - jobCost >= 0) {
             job->setSubmittingTime(time);
             job->setUser(this);
             job->insertIn(simulator, scheduler);// insert the job int the scheduler
 
-            removeFromBudget((job->getExecutionTime() * scheduler->costPerHourPerNode()) * job->getNumberOfNodes());
+            removeFromBudget(jobCost);
             time += Random::exponential(meanTimeToNextJob);
             simulator->insert(this);
             currentlyUsedNumberOfNodes += job->getNumberOfNodes();
