@@ -6,6 +6,8 @@ It aims to simulate the behavior of a computing platform for exploring different
 
 Information about the design can be found in ```doc/Description_of_Design_employed.pdf```
 
+A Doxyfile is available at `doc/Doxyfile' for generating html and latex documentation with Doxygen.
+
 # With Cmake
 In order to configure this project CMakeFileList.txt have been configure.
 The user shall run ```cmake .``` int the project folder.
