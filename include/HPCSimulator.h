@@ -7,37 +7,99 @@
 #include "User.h"
 
 class GpuJob;
+
 class SmallJob;
+
 class MediumJob;
+
 class LargeJob;
+
 class HugeJob;
+
 class User;
 
 class HPCSimulator : public Simulator {
 private:
-    std::vector<User*> users;
-    std::vector<GpuJob*> finishedGpuJobs;
-    std::vector<SmallJob*> finishedSmallJobs;
-    std::vector<MediumJob*> finishedMediumJobs;
-    std::vector<LargeJob*> finishedLargeJobs;
-    std::vector<HugeJob*> finishedHugeJobs;
-    double initialUsersBudget=0;
+    /**
+     * Holding the list of the users generated from the input file
+     */
+    std::vector<User *> users;
+    /**
+     * Register all the finished gpu jobs
+     */
+    std::vector<GpuJob *> finishedGpuJobs;
+    /**
+     * Register all the finished small jobs
+     */
+    std::vector<SmallJob *> finishedSmallJobs;
+    /**
+    * Register all the finished medium jobs
+    */
+    std::vector<MediumJob *> finishedMediumJobs;
+    /**
+    * Register all the finished large jobs
+    */
+    std::vector<LargeJob *> finishedLargeJobs;
+    /**
+     * Register all the finished huge jobs
+     */
+    std::vector<HugeJob *> finishedHugeJobs;
+    /**
+    * Register how much budget can be spent by the users generated from the input file
+    */
+    double initialUsersBudget = 0;
 
 public:
-	HPCSimulator() = default;
-	void initialisation (string filename);
-	void start();
+    HPCSimulator() = default;
 
+    /**
+     * Parse the file for generating Students, Researches, Groups and Curriculum
+     * @param filename
+     */
+    void initialisation(string filename);
+
+    /**
+     * Create the scheduler, initialise the Nodes according to HPCParameters.
+     * initialise every elements required for the simulation
+     * launch the simulation and cleans up
+     */
+    void start();
+
+    /**
+     * Register a finished Gpu Job
+     * @param pJob
+     */
     void registerFinishedGpuJobs(GpuJob *pJob);
 
+
+    /**
+     * Register a finished Small Job
+     * @param pJob
+     */
     void registerFinishedSmallJobs(SmallJob *pJob);
 
+
+    /**
+     * Register a finished Medium Job
+     * @param pJob
+     */
     void registerFinishedMediumJobs(MediumJob *pJob);
 
+    /**
+     * Register a finished Large Job
+     * @param pJob
+     */
     void registerFinishedLargeJobs(LargeJob *pJob);
 
+    /**
+     * Register a finished Huge Job
+     * @param pJob
+     */
     void registerFinishedHugeJobs(HugeJob *pJob);
 
+    /**
+     * Compute measurements for the simulation and print the results
+     */
     void printResults();
 };
 

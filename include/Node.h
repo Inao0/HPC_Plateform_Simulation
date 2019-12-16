@@ -17,46 +17,99 @@ class HPCSimulator;
 */
 class Node : public Event {
 protected:
+    /**
+     * Job currently being executed by the node
+     */
 	AbstractJob* jobBeingExecuted;
-    /*JobQueue* queue;*/
+    /**
+     * scheduler (for saying that the node is free)
+     */
     AbstractScheduler* scheduler;
-	double serviceTime;
-	double waitingTime;
-	double waitingTimeQueue;
-	int queueSize;
-	int num;
 
 public:
+    /**
+     * Set jobBeing executed to nullptr
+     */
 	Node();
 	Node(const Node& node) = delete;
 	Node& operator=(const Node& node) = delete;
 
+	/**
+	 * Set the scheduler for this node
+	 * @param scheduler
+	 * @return this Node
+	 */
 	Node& addScheduler(AbstractScheduler* scheduler);
+	/**
+	 *  A node event execute when the job it is executing is done.
+	 *  Therefore it reduce the number of nodes currently use of the job's user by one
+	 *  It sets the completion time of the job
+	 *  It registers the job as finished
+	 *  set jobBeingExecuted to null pointer and tell the scheduler that he is free to execute a new job
+	 * @param simulator
+	 */
 	void execute(AbstractSimulator *simulator);
+
+	/**
+	 * Return true if the node is not executing a job
+	 * @return
+	 */
 	bool isAvailable();
 
     /**
-    * Start a customer's service.  The simulator must be passed in
-    * as a parameter so that this can  schedule the time
-    * when this server will be done with the customer.
-    */
+     * Set the nex job to execute
+     * @param simulator
+     * @param job
+     */
 	void insert(AbstractSimulator* simulator, AbstractJob* job);
+
+	/**
+	 * Print an end of execution message
+	 */
 	void printMessage();
-	void getStats() const;
+
+	/**
+	 * Tells the scheduler that this normal node is free for getting a new job
+	 * @param Simulator
+	 */
 	virtual void addFreeNodeToScheduler(AbstractSimulator *Simulator);
 };
 
+/**
+ * This class is for the nodes that are reserved for medium jobs
+ */
 class ReservedForMediumJobNode : public Node {
 public:
+    /**
+     * Tells the scheduler that this node is free for getting a new  medium job
+     * @param Simulator
+     */
     void addFreeNodeToScheduler(AbstractSimulator *simulator) override;
 };
 
+
+/**
+ * This class is for the nodes that are reserved for small jobs
+ */
 class ReservedForSmallJobNode : public Node {
 public:
-    void addFreeNodeToScheduler(AbstractSimulator *simulator) override;
+    /**
+    * Tells the scheduler that this node is free for getting a new small job
+    * @param Simulator
+    */
+void addFreeNodeToScheduler(AbstractSimulator *simulator) override;
 };
 
+
+/**
+ * This class is for the nodes equiped with GPU
+ */
 class GpuNode : public Node {
 public:
-    void addFreeNodeToScheduler(AbstractSimulator* Simulator) override;
+    /**
+    * Tells the scheduler that this node equipped with gpu is free for getting a new small job
+    * @param Simulator
+    */
+
+void addFreeNodeToScheduler(AbstractSimulator* Simulator) override;
 };
