@@ -1,6 +1,7 @@
 #pragma once
 
-#include <vector>
+#include<vector>
+#include <set>
 #include "Simulator.h"
 #include "Group.h"
 #include "Curriculum.h"
@@ -27,23 +28,23 @@ private:
     /**
      * Register all the finished gpu jobs
      */
-    std::vector<GpuJob *> finishedGpuJobs;
+    std::unordered_set<GpuJob *> finishedGpuJobs;
     /**
      * Register all the finished small jobs
      */
-    std::vector<SmallJob *> finishedSmallJobs;
+    std::unordered_set<SmallJob *> finishedSmallJobs;
     /**
     * Register all the finished medium jobs
     */
-    std::vector<MediumJob *> finishedMediumJobs;
+    std::unordered_set<MediumJob *> finishedMediumJobs;
     /**
     * Register all the finished large jobs
     */
-    std::vector<LargeJob *> finishedLargeJobs;
+    std::unordered_set<LargeJob *> finishedLargeJobs;
     /**
      * Register all the finished huge jobs
      */
-    std::vector<HugeJob *> finishedHugeJobs;
+    std::unordered_set<HugeJob *> finishedHugeJobs;
     /**
     * Register how much budget can be spent by the users generated from the input file
     */

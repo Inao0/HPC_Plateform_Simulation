@@ -199,23 +199,23 @@ void HPCSimulator::initialisation(string filename) {
 }
 
 void HPCSimulator::registerFinishedGpuJobs(GpuJob *pJob) {
-    finishedGpuJobs.push_back(pJob);
+    finishedGpuJobs.insert(pJob);
 }
 
 void HPCSimulator::registerFinishedSmallJobs(SmallJob *pJob) {
-    finishedSmallJobs.push_back(pJob);
+    finishedSmallJobs.insert(pJob);
 }
 
 void HPCSimulator::registerFinishedMediumJobs(MediumJob *pJob) {
-    finishedMediumJobs.push_back(pJob);
+    finishedMediumJobs.insert(pJob);
 }
 
 void HPCSimulator::registerFinishedLargeJobs(LargeJob *pJob) {
-    finishedLargeJobs.push_back(pJob);
+    finishedLargeJobs.insert(pJob);
 }
 
 void HPCSimulator::registerFinishedHugeJobs(HugeJob *pJob) {
-    finishedHugeJobs.push_back(pJob);
+    finishedHugeJobs.insert(pJob);
 }
 
 void HPCSimulator::printResults() {
@@ -236,35 +236,35 @@ void HPCSimulator::printResults() {
     cout << "In average, " << finishedGpuJobs.size() / numberOfWeeks << " gpu jobs ran per weeks \n";
 
     for (auto &job: finishedSmallJobs) {
-        nodeHoursUsedBySmall += job->getExecutionDuration();
+        nodeHoursUsedBySmall += job->getExecutionDuration()*job->getNumberOfNodes();
         averageWaitingTimeSmall += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
         turnaroudTimeRatio.push_back(
                 (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
     }
     averageWaitingTimeSmall = averageWaitingTimeSmall / finishedSmallJobs.size();
     for (auto &job: finishedMediumJobs) {
-        nodeHoursUsedByMedium += job->getExecutionDuration();
+        nodeHoursUsedByMedium += job->getExecutionDuration()*job->getNumberOfNodes();
         averageWaitingTimeMedium += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
         turnaroudTimeRatio.push_back(
                 (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
     }
     averageWaitingTimeMedium = averageWaitingTimeMedium / finishedMediumJobs.size();
     for (auto &job: finishedLargeJobs) {
-        nodeHoursUsedByLarge += job->getExecutionDuration();
+        nodeHoursUsedByLarge += job->getExecutionDuration()*job->getNumberOfNodes();
         averageWaitingTimeLarge += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
         turnaroudTimeRatio.push_back(
                 (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
     }
     averageWaitingTimeLarge = averageWaitingTimeLarge / finishedLargeJobs.size();
     for (auto &job: finishedHugeJobs) {
-        nodeHoursUsedByHuge += job->getExecutionDuration();
+        nodeHoursUsedByHuge += job->getExecutionDuration()*job->getNumberOfNodes();
         averageWaitingTimeHuge += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
         turnaroudTimeRatio.push_back(
                 (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
     }
     averageWaitingTimeHuge = averageWaitingTimeHuge / finishedHugeJobs.size();
     for (auto &job: finishedGpuJobs) {
-        nodeHoursUsedByGpu += job->getExecutionDuration();
+        nodeHoursUsedByGpu += job->getExecutionDuration()*job->getNumberOfNodes();
         averageWaitingTimeGpu += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
         turnaroudTimeRatio.push_back(
                 (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
