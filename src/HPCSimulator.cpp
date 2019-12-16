@@ -22,19 +22,19 @@ void HPCSimulator::start() {
     /* Connect them together. */
     int numberOfNodesAdded = 0;
     std::vector<Node *> nodes;
-    for (int i = 0; i < JobsSizes::NumberOfGpuNodes; ++i) {
+    for (int i = 0; i < HPCParameters::NumberOfGpuNodes; ++i) {
         nodes.push_back(new GpuNode());
         numberOfNodesAdded++;
     }
-    for (int i = 0; i < 0.1 * JobsSizes::TotalNumberOfNodes; ++i) {
+    for (int i = 0; i < 0.1 * HPCParameters::TotalNumberOfNodes; ++i) {
         nodes.push_back(new ReservedForSmallJobNode());
         numberOfNodesAdded++;
     }
-    for (int i = 0; i < 0.3 * JobsSizes::TotalNumberOfNodes; ++i) {
+    for (int i = 0; i < 0.3 * HPCParameters::TotalNumberOfNodes; ++i) {
         nodes.push_back(new ReservedForMediumJobNode());
         numberOfNodesAdded++;
     }
-    for (int i = numberOfNodesAdded; i < JobsSizes::TotalNumberOfNodes; i++) {
+    for (int i = numberOfNodesAdded; i < HPCParameters::TotalNumberOfNodes; i++) {
         nodes.push_back(new Node());
         numberOfNodesAdded++;
     }
@@ -199,23 +199,23 @@ void HPCSimulator::initialisation(string filename) {
 }
 
 void HPCSimulator::registerFinishedGpuJobs(GpuJob *pJob) {
-    finishedGpuJobs.push_back(pJob);
+    finishedGpuJobs.insert(pJob);
 }
 
 void HPCSimulator::registerFinishedSmallJobs(SmallJob *pJob) {
-    finishedSmallJobs.push_back(pJob);
+    finishedSmallJobs.insert(pJob);
 }
 
 void HPCSimulator::registerFinishedMediumJobs(MediumJob *pJob) {
-    finishedMediumJobs.push_back(pJob);
+    finishedMediumJobs.insert(pJob);
 }
 
 void HPCSimulator::registerFinishedLargeJobs(LargeJob *pJob) {
-    finishedLargeJobs.push_back(pJob);
+    finishedLargeJobs.insert(pJob);
 }
 
 void HPCSimulator::registerFinishedHugeJobs(HugeJob *pJob) {
-    finishedHugeJobs.push_back(pJob);
+    finishedHugeJobs.insert(pJob);
 }
 
 void HPCSimulator::printResults() {
@@ -225,7 +225,7 @@ void HPCSimulator::printResults() {
     double averageWaitingTimeSmall = 0, averageWaitingTimeMedium = 0, averageWaitingTimeLarge = 0, averageWaitingTimeHuge = 0, averageWaitingTimeGpu = 0;
     std::vector<double> turnaroudTimeRatio;
     double averageTurnaroundTimeRatio = 0;
-    double opertationCost = JobsSizes::overallOperationCostPerHour * (numberOfWeeks * numberOfHoursInAWeek);
+    double opertationCost = HPCParameters::overallOperationCostPerHour * (numberOfWeeks * numberOfHoursInAWeek);
 
     cout << "\nThe simulation ran for : " << numberOfWeeks << " weeks \n";
     cout << "==============THROUGHPUT==============\n";
@@ -236,35 +236,35 @@ void HPCSimulator::printResults() {
     cout << "In average, " << finishedGpuJobs.size() / numberOfWeeks << " gpu jobs ran per weeks \n";
 
     for (auto &job: finishedSmallJobs) {
-        nodeHoursUsedBySmall += job->getExecutionDuration();
+        nodeHoursUsedBySmall += job->getExecutionDuration()*job->getNumberOfNodes();
         averageWaitingTimeSmall += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
         turnaroudTimeRatio.push_back(
                 (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
     }
     averageWaitingTimeSmall = averageWaitingTimeSmall / finishedSmallJobs.size();
     for (auto &job: finishedMediumJobs) {
-        nodeHoursUsedByMedium += job->getExecutionDuration();
+        nodeHoursUsedByMedium += job->getExecutionDuration()*job->getNumberOfNodes();
         averageWaitingTimeMedium += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
         turnaroudTimeRatio.push_back(
                 (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
     }
     averageWaitingTimeMedium = averageWaitingTimeMedium / finishedMediumJobs.size();
     for (auto &job: finishedLargeJobs) {
-        nodeHoursUsedByLarge += job->getExecutionDuration();
+        nodeHoursUsedByLarge += job->getExecutionDuration()*job->getNumberOfNodes();
         averageWaitingTimeLarge += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
         turnaroudTimeRatio.push_back(
                 (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
     }
     averageWaitingTimeLarge = averageWaitingTimeLarge / finishedLargeJobs.size();
     for (auto &job: finishedHugeJobs) {
-        nodeHoursUsedByHuge += job->getExecutionDuration();
+        nodeHoursUsedByHuge += job->getExecutionDuration()*job->getNumberOfNodes();
         averageWaitingTimeHuge += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
         turnaroudTimeRatio.push_back(
                 (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
     }
     averageWaitingTimeHuge = averageWaitingTimeHuge / finishedHugeJobs.size();
     for (auto &job: finishedGpuJobs) {
-        nodeHoursUsedByGpu += job->getExecutionDuration();
+        nodeHoursUsedByGpu += job->getExecutionDuration()*job->getNumberOfNodes();
         averageWaitingTimeGpu += (job->getCompletionTime() - job->getSubmittingTime() - job->getExecutionDuration());
         turnaroudTimeRatio.push_back(
                 (job->getCompletionTime() - job->getSubmittingTime()) / job->getExecutionDuration());
@@ -291,15 +291,15 @@ void HPCSimulator::printResults() {
 
 
     cout << "\n================ COSTS ================\n";
-    double totalUserCost = nodeHoursUsed * JobsSizes::costOneHourOneNode + (nodeHoursUsedByGpu *
-                                                                            (JobsSizes::costOneHourOneGPUNode -
-                                                                             JobsSizes::costOneHourOneNode));
+    double totalUserCost = nodeHoursUsed * HPCParameters::costOneHourOneNode + (nodeHoursUsedByGpu *
+                                                                                (HPCParameters::costOneHourOneGPUNode -
+                                                                                 HPCParameters::costOneHourOneNode));
     cout << "Resulting price paid by users :" << totalUserCost << "\n"
-         << nodeHoursUsedBySmall * JobsSizes::costOneHourOneNode << " for small jobs \n"
-         << nodeHoursUsedByMedium * JobsSizes::costOneHourOneNode << " for medium jobs \n"
-         << nodeHoursUsedByLarge * JobsSizes::costOneHourOneNode << " for large jobs \n"
-         << nodeHoursUsedByHuge * JobsSizes::costOneHourOneNode << " for huge jobs \n"
-         << nodeHoursUsedByGpu * JobsSizes::costOneHourOneGPUNode << " for Gpu jobs \n";
+         << nodeHoursUsedBySmall * HPCParameters::costOneHourOneNode << " for small jobs \n"
+         << nodeHoursUsedByMedium * HPCParameters::costOneHourOneNode << " for medium jobs \n"
+         << nodeHoursUsedByLarge * HPCParameters::costOneHourOneNode << " for large jobs \n"
+         << nodeHoursUsedByHuge * HPCParameters::costOneHourOneNode << " for huge jobs \n"
+         << nodeHoursUsedByGpu * HPCParameters::costOneHourOneGPUNode << " for Gpu jobs \n";
 
 
     cout << "\n============ WAITING TIME ============\n"

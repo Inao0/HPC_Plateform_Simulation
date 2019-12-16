@@ -1,3 +1,4 @@
+/*=================USED AS IS FROM C++ EXERCISE ON PATIENT SIMULATOR =============================*/
 #pragma once
 
 #include "AbstractSimulator.h"

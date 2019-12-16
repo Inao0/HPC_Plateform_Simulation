@@ -3,7 +3,8 @@
 
 #include <iostream>
 #include <string>
-
+/*=================USED AS IS FROM C++ EXERCISE ON PATIENT SIMULATOR =============================*/
+// excepted for the addition of the method for AbstractSimulator returning the size of the event queue//
 using namespace std;
 
 class AbstractSimulator;

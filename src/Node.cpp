@@ -6,30 +6,12 @@
 #include "../include/ListQueue.h"
 
 
-// convert the time in seconds to hrs, mins, secs
-string convertTime(double t) {
-    // current time value is decimal in hours, so multiply by 3600 to get seconds and round
-    int time = static_cast<int>(round(t * 3600));
 
-    // convert seconds to hrs, mins, secs
-    int hour = time / 3600;
-    time = time % 3600;
-    int min = time / 60;
-    time = time % 60;
-    int sec = time;
-
-    string s = to_string(hour) + "hrs:" + to_string(min) + "mins:" + to_string(sec) + "secs";
-    return s;
-}
 
 
 
 Node::Node() : Event() {
     jobBeingExecuted = nullptr;
-    serviceTime = waitingTime = 0.0;
-    waitingTimeQueue = 0.0;
-    num = 0;
-    queueSize = 0;
 }
 
 Node &Node::addScheduler(AbstractScheduler *scheduler) {
@@ -37,19 +19,8 @@ Node &Node::addScheduler(AbstractScheduler *scheduler) {
     return *this;
 }
 
-// compute the average statistics
-void Node::getStats() const {
-    std::cout << "average service time is " << convertTime(serviceTime / num) << "\n";
-    std::cout << "average waiting time is " << convertTime(waitingTime / num) << "\n";
-    std::cout << "average waiting time queue is " << convertTime(waitingTimeQueue / num) << "\n";
-    std::cout << "average queue size is " << static_cast<double>(queueSize) / num << "\n";
-}
 
 
-/**
-* The customer's service is completed so print a message.
-* If the queue is not empty, get the next customer.
-*/
 void Node::execute(AbstractSimulator *HPCsimulator) {
     Event::execute(HPCsimulator);
     printMessage();
@@ -94,7 +65,6 @@ void Node::insert(AbstractSimulator *simulator, AbstractJob *job) {
     // service time is set at average 15 patients per hour
     time = simulator->now() + job->getExecutionDuration() ;//Random::exponential(15)
     simulator->insert(this);
-    num++;
 }
 
 void Node::printMessage() {
@@ -104,10 +74,4 @@ void Node::printMessage() {
     std::cout << "Job waiting time in queue "
               << convertTime(time - jobBeingExecuted->getExecutionDuration() - jobBeingExecuted->getSubmittingTime())
               << "\n";
-
-    // update the various times and queue size so we can calcualte averages at the end
-    serviceTime += jobBeingExecuted->getExecutionDuration();
-    waitingTime += time - jobBeingExecuted->getSubmittingTime();
-    waitingTimeQueue += time - jobBeingExecuted->getExecutionDuration() - jobBeingExecuted->getSubmittingTime();
-    //queueSize += queue->size();
 }

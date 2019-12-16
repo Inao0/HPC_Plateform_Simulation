@@ -1,23 +1,21 @@
 #include "../include/AbstractJob.h"
 #include "../include/User.h"
 #include "../include/random.h"
-#include "../include/JobsSizes.h"
+#include "../include/HPCParameters.h"
 
-/*RESOURCE from stackoverflow https://stackoverflow.com/questions/7803345/how-to-randomly-select-a-class-to-instantiate-without-using-switch
- * about generating randomly one of the different subclasses */
+//Initializing the abstract job static counter variable
 int AbstractJob::jobCounter = 0;
+
 
 AbstractJob::AbstractJob() {
     id = ++jobCounter;
 }
 
-double AbstractJob::priority() const {
-    return (-submittingTime);
-}
-
+//Defining a template for creating a new instance
 template<typename T>
 AbstractJob *CreateJob() { return new T(); }
 
+//Using the previous template we create an array of "constructors"
 CreateJobFn create[] =
         {
                 &CreateJob<LargeJob>,
@@ -28,14 +26,15 @@ CreateJobFn create[] =
 
         };
 
-
+// Assessing the size of the previous array
 const size_t fncount = sizeof(create) / sizeof(*create);
+
 
 AbstractJob *CreateRandomJob(const bool permissions[5]) {
     std::vector <int> proportionsWithPermissions= {0,0,0,0,0};
     for (int i = 0; i < 5; ++i) {
         if (permissions[i]){
-            proportionsWithPermissions[i]=JobsSizes::jobTypeProportions[i];
+            proportionsWithPermissions[i]=HPCParameters::jobTypeProportions[i];
         }
     }
     std::random_device randomDevice;
@@ -67,6 +66,11 @@ void HugeJob::insertIn(AbstractSimulator *simulator, AbstractScheduler *schedule
 
 
 void AbstractJob::generateRandomTime(double minTime, double maxTime) {
+    /*We use the fact that 99.7% of the time, a random variable following a normal
+     * is not further than three times the standard deviation from the mean value
+     * Therefore we set the mean value in the middle of our interval
+     * and the standard deviation to the width of the interval divided by 6
+    */
     double timeMean = 0.5 * (minTime + maxTime);
     double timeStddev = (maxTime - minTime) / 6;
     do {
@@ -76,30 +80,30 @@ void AbstractJob::generateRandomTime(double minTime, double maxTime) {
 
 //TODO : ASSUMPTION on minimum limits
 void LargeJob::generateRandomRequirements() {
-    generateRandomTime(JobsSizes::mediumMaximumTime, JobsSizes::largeMaximumTime);
-    numberOfNodes = JobsSizes::mediumMaxNumberOfNode +
-                    Random::binomialInt(JobsSizes::largeMaxNumberOfNode - JobsSizes::mediumMaxNumberOfNode, 0.5);
+    generateRandomTime(HPCParameters::mediumMaximumTime, HPCParameters::largeMaximumTime);
+    numberOfNodes = HPCParameters::mediumMaxNumberOfNode +
+                    Random::binomialInt(HPCParameters::largeMaxNumberOfNode - HPCParameters::mediumMaxNumberOfNode, 0.5);
 }
 
 void HugeJob::generateRandomRequirements() {
-    generateRandomTime(JobsSizes::largeMaximumTime, JobsSizes::hugeMaximumTime);
-    numberOfNodes = JobsSizes::largeMaxNumberOfNode +
-                    Random::binomialInt(JobsSizes::hugeMaxNumberOfNode - JobsSizes::largeMaxNumberOfNode, 0.5);
+    generateRandomTime(HPCParameters::largeMaximumTime, HPCParameters::hugeMaximumTime);
+    numberOfNodes = HPCParameters::largeMaxNumberOfNode +
+                    Random::binomialInt(HPCParameters::hugeMaxNumberOfNode - HPCParameters::largeMaxNumberOfNode, 0.5);
 }
 
 void MediumJob::generateRandomRequirements() {
-    generateRandomTime(JobsSizes::smallMaximumTime, JobsSizes::mediumMaximumTime);
-    numberOfNodes = JobsSizes::smallMaxNumberOfNode +
-                    Random::binomialInt(JobsSizes::mediumMaxNumberOfNode - JobsSizes::smallMaxNumberOfNode, 0.5);
+    generateRandomTime(HPCParameters::smallMaximumTime, HPCParameters::mediumMaximumTime);
+    numberOfNodes = HPCParameters::smallMaxNumberOfNode +
+                    Random::binomialInt(HPCParameters::mediumMaxNumberOfNode - HPCParameters::smallMaxNumberOfNode, 0.5);
 }
 void SmallJob::generateRandomRequirements() {
-    generateRandomTime(0, JobsSizes::smallMaximumTime);
-    numberOfNodes = 1+Random::binomialInt(JobsSizes::smallMaxNumberOfNode-1, 0.5);
+    generateRandomTime(0, HPCParameters::smallMaximumTime);
+    numberOfNodes = 1+Random::binomialInt(HPCParameters::smallMaxNumberOfNode - 1, 0.5);
 }
 
 void GpuJob::generateRandomRequirements() {
-	generateRandomTime(0, JobsSizes::gpuMaximumTime);
-	numberOfNodes = 1 + Random::binomialInt(JobsSizes::gpuMaxNumberOfNode-1, 0.5);
+	generateRandomTime(0, HPCParameters::gpuMaximumTime);
+	numberOfNodes = 1 + Random::binomialInt(HPCParameters::gpuMaxNumberOfNode - 1, 0.5);
 }
 
 void HugeJob::tryToExecute(AbstractSimulator *simulator, AbstractScheduler *scheduler) {

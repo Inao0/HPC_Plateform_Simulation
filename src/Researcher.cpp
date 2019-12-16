@@ -15,11 +15,11 @@ Researcher::Researcher(Group *group, double meanTimeBetweenTwoJobs, double first
 }
 
 double Researcher::budgetLeft() {
-    return (budget + group->getGroupRessourcesInNodeHour());
+    return (budget + group->getGroupBudget());
 }
 
 void Researcher::removeFromBudget(double amountToRemove) {
-    double groupRessources = group->getGroupRessourcesInNodeHour();
+    double groupRessources = group->getGroupBudget();
     if (amountToRemove<groupRessources){
         group->removeFromGroupRessources(amountToRemove);
     }

@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include "../src/factorial.cpp"
+#include "../include/Student.h"
 
 TEST_CASE( "Factorials are computed", "[factorial]" ) {
 REQUIRE( Factorial(0) == 1 );
