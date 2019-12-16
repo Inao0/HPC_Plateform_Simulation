@@ -4,11 +4,16 @@
 #include <unordered_set>
 #include "AbstractScheduler.h"
 #include "HPCParameters.h"
-/**
+/*
 * Generate a stream of jobs for 8.0 time units.
 */
-class AbstractScheduler;
 
+class AbstractScheduler;
+/**
+ * User class specify  the behavior of Users.
+ * Users events corresponds to a user creating a new job and trying to submit it.
+ * it will re
+ */
 class User : public Event {
 protected:
     double budget = 0;

@@ -3,21 +3,19 @@
 #include "../include/random.h"
 #include "../include/HPCParameters.h"
 
-/*RESOURCE from stackoverflow https://stackoverflow.com/questions/7803345/how-to-randomly-select-a-class-to-instantiate-without-using-switch
- * about generating randomly one of the different subclasses */
+//Initializing the abstract job static counter variable
 int AbstractJob::jobCounter = 0;
+
 
 AbstractJob::AbstractJob() {
     id = ++jobCounter;
 }
 
-double AbstractJob::priority() const {
-    return (-submittingTime);
-}
-
+//Defining a template for creating a new instance
 template<typename T>
 AbstractJob *CreateJob() { return new T(); }
 
+//Using the previous template we create an array of "constructors"
 CreateJobFn create[] =
         {
                 &CreateJob<LargeJob>,
@@ -28,8 +26,9 @@ CreateJobFn create[] =
 
         };
 
-
+// Assessing the size of the previous array
 const size_t fncount = sizeof(create) / sizeof(*create);
+
 
 AbstractJob *CreateRandomJob(const bool permissions[5]) {
     std::vector <int> proportionsWithPermissions= {0,0,0,0,0};
@@ -67,6 +66,11 @@ void HugeJob::insertIn(AbstractSimulator *simulator, AbstractScheduler *schedule
 
 
 void AbstractJob::generateRandomTime(double minTime, double maxTime) {
+    /*We use the fact that 99.7% of the time, a random variable following a normal
+     * is not further than three times the standard deviation from the mean value
+     * Therefore we set the mean value in the middle of our interval
+     * and the standard deviation to the width of the interval divided by 6
+    */
     double timeMean = 0.5 * (minTime + maxTime);
     double timeStddev = (maxTime - minTime) / 6;
     do {
